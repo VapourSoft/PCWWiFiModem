@@ -171,6 +171,7 @@ char *dialNumber(char *atCmd) {
       sendResult(R_CONNECT);
       digitalWrite(DCD, ACTIVE);
       state = ONLINE;
+      minTelnetOptionsPending = !(sessionTelnetType == NO_TELNET);
       yield();
    } else {
       sendResult(R_NO_CARRIER);
@@ -698,4 +699,3 @@ char *resetToNvram(char *atCmd) {
    ESP.restart();
    return atCmd;                       // should never actually get here...
 }
-

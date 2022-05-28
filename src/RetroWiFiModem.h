@@ -46,6 +46,7 @@
    #define VLREQ     ((uint8_t)1)
    #define LOC       ((uint8_t)23)
    #define TTYPE     ((uint8_t)24)
+   #define EOR       ((uint8_t)25)
    #define NAWS      ((uint8_t)31)
    #define TSPEED    ((uint8_t)32)
    #define LFLOW     ((uint8_t)33)
@@ -62,6 +63,7 @@
    #define DO        ((uint8_t)253)
    #define DONT      ((uint8_t)254)
    #define IAC       ((uint8_t)255)
+   #define KERMIT    ((uint8_t)47)
 
    #define NIST_HOST "time.nist.gov"
    #define NIST_PORT 13
@@ -84,12 +86,15 @@
 
    #ifdef ARDUINO_ESP8266_WEMOS_D1MINI
       // D1 mini pins
-      #define CTS D8            // (GPIO15) output
-      #define RTS D7            // (GPIO13) input
-      #define RI  D6            // (GPIO12) output
-      #define DSR D2            // (GPIO04) output
-      #define DCD D1            // (GPIO05) output
-      #define TXEN D5           // (GPIO14) output
+      
+	  //Note change from original project
+      #define CTS D7            // (GPIO13) output
+      #define RTS D8            // (GPIO15) input
+
+      #define RI  D6            // (GPIO12) output (Not connected in PCW WiFi)
+      #define DSR D2            // (GPIO04) output (Not connected in PCW WiFi)
+      #define DCD D1            // (GPIO05) output (Not connected in PCW WiFi)
+      #define TXEN D5           // (GPIO14) output (Not connected in PCW WiFi)
    #endif
 
 #endif

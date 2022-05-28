@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name RetroWiFiModem-footprints)(type KiCad)(uri ${KIPRJMOD}/footprints)(options "")(descr ""))
-)

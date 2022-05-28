@@ -17,7 +17,7 @@ char *factoryDefaults(char *atCmd) {
       settings.alias[i][0] = NUL;
       settings.speedDial[i][0] = NUL;
    }
-   strcpy(settings.mdnsName, "espmodem");
+   strcpy(settings.mdnsName, "pcwmodem");
    settings.autoAnswer = 0;
    settings.listenPort = 0;
    strcpy(settings.busyMsg, "Sorry, the system is currently busy. Please try again later.");
@@ -25,7 +25,7 @@ char *factoryDefaults(char *atCmd) {
    settings.echo = true;
    settings.telnet = REAL_TELNET;
    settings.autoExecute[0] = NUL;
-   strcpy(settings.terminal, "ansi");
+   strcpy(settings.terminal, "VT52");
    strcpy(settings.location, "Computer Room");
    settings.startupWait = false;
    settings.extendedCodes = true;
@@ -58,7 +58,6 @@ char *factoryDefaults(char *atCmd) {
 // AT&K? query flow control setting
 // AT&K0 disable RTS/CTS flow control
 // AT&K1 enable RTS/CTS flow control
-//
 char *doFlowControl(char *atCmd) {
    switch( atCmd[0] ) {
       case '?':
@@ -72,6 +71,7 @@ char *doFlowControl(char *atCmd) {
       case '1':
       case NUL:
          settings.rtsCts = atCmd[0] == '1';
+         setHardwareFlow(settings.rtsCts);
          if( atCmd[0] ) {
             ++atCmd;
          }
