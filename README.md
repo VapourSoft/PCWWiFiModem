@@ -4,7 +4,7 @@ This is a fork of the original fantastic Retro WiFi modem, with cusomization for
 
 Please see the original project for more information on Retro WiFi modem, it's history, and hardware.  
 
-#Notable Changes
+### Notable Changes
 1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
 2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
 3. Changes to CTS/RTS handling to match the hardware
