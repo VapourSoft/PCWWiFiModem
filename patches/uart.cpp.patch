@@ -1,0 +1,12 @@
+--- /mnt/c/Users/shane/.platformio/packages/framework-arduinoespressif8266@3.20704.0/cores/esp8266/uart.cpp	2020-08-02 19:13:59.000000000 +0100
++++ /mnt/c/temp/uart.cpp	2022-05-24 22:26:12.324481200 +0100
+@@ -473,7 +473,8 @@
+ static void
+ uart_do_write_char(const int uart_nr, char c)
+ {
+-    while(uart_tx_fifo_full(uart_nr));
++    while(uart_tx_fifo_full(uart_nr))
++        yield(); //PATCHED: no matter how long the code has to wait for space in the transmit FIFO, the watchdog is kept well fed and quiet.
+ 
+     USF(uart_nr) = c;
+ }

@@ -99,6 +99,7 @@ void sendSerialData() {
    yield();
 }
 
+
 //
 // Receive data from the TCP client
 //
@@ -138,57 +139,80 @@ int receiveTcpData() {
                   case SUP_GA:
                   case TTYPE:
                   case TSPEED:
-                     bytesOut += tcpClient.write(IAC);      // we will say what
-                     bytesOut += tcpClient.write(WILL);     // the terminal is
-                     bytesOut += tcpClient.write(cmdByte2);
-                     break;
+                     {
+                        uint8_t buf[] = {IAC,WILL,cmdByte2};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
+                     // we will say what the terminal is
+                    break;
                   case LOC:
                   case NAWS:
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(WILL);
-                     bytesOut += tcpClient.write(cmdByte2);
+                     {
+                        uint8_t buf[] = {IAC,WILL,cmdByte2};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
 
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(SB);
-                     bytesOut += tcpClient.write(cmdByte2);
                      switch( cmdByte2 ) {
                         case NAWS:     // window size
-                           bytesOut += tcpClient.write((uint8_t)0);
-                           bytesOut += tcpClient.write(settings.width);
-                           bytesOut += tcpClient.write((uint8_t)0);
-                           bytesOut += tcpClient.write(settings.height);
+                           {
+                              uint8_t buf[] = {IAC,SB,NAWS,(uint8_t)0,settings.width,(uint8_t)0,settings.height,IAC,SE };
+                              bytesOut += tcpClient.write(buf,sizeof(buf));
+                           }
                            break;
                         case LOC:      // terminal location
+                           {
+                              uint8_t buf[] = {IAC,SB,LOC};
+                              bytesOut += tcpClient.write(buf,sizeof(buf));
+                           }
                            bytesOut += tcpClient.print(settings.location);
+                           bytesOut += tcpClient.write(IAC);
+                           bytesOut += tcpClient.write(SE);
+
                            break;
                      }
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(SE);
                      break;
                   default:
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(WONT);
-                     bytesOut += tcpClient.write(cmdByte2);
+                     {
+                        uint8_t buf[] = {IAC,WONT,cmdByte2};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
+
                      break;
                }
                break;
             case WILL:
                // Server wants to do option, allow most
-               bytesOut += tcpClient.write(IAC);
-               switch( cmdByte2 ) {
-                  case LINEMODE:
-                  case NAWS:
-                  case LFLOW:
-                  case NEW_ENVIRON:
-                  case XDISPLOC:
-                     bytesOut += tcpClient.write(DONT);
-                     break;
-                  default:
-                     bytesOut += tcpClient.write(DO);
-                     break;
+
+               if (cmdByte2 > ((uint8_t)49) ) // DONT non-standard features
+                     {
+                        uint8_t buf[] = {IAC,DONT,cmdByte2};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
+               else
+               {
+                  switch( cmdByte2 ) {
+                     case LINEMODE:
+                     case NAWS:
+                     case LFLOW:
+                     case NEW_ENVIRON:
+                     case XDISPLOC:
+                     case KERMIT:
+                     case EOR:
+                        {
+                           uint8_t buf[] = {IAC,DONT,cmdByte2};
+                           bytesOut += tcpClient.write(buf,sizeof(buf));
+                        }
+                        break;
+                     default:
+                        {
+                           uint8_t buf[] = {IAC,DO,cmdByte2};
+                           bytesOut += tcpClient.write(buf,sizeof(buf));
+                        }
+                        break;
+                  }
                }
-               bytesOut += tcpClient.write(cmdByte2);
                break;
+
             case SB:
                switch( cmdByte2 ) {
                   case TTYPE:
@@ -197,10 +221,11 @@ int receiveTcpData() {
                         ++bytesIn;
                      }
                      ++bytesIn;
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(SB);
-                     bytesOut += tcpClient.write(cmdByte2);
-                     bytesOut += tcpClient.write(VLSUP);
+
+                     {
+                        uint8_t buf[] = {IAC,SB,cmdByte2,VLSUP};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
                      switch( cmdByte2 ) {
                         case TTYPE:    // terminal type
                            bytesOut += tcpClient.print(settings.terminal);
@@ -211,8 +236,10 @@ int receiveTcpData() {
                            bytesOut += tcpClient.print(settings.serialSpeed);
                            break;
                      }
-                     bytesOut += tcpClient.write(IAC);
-                     bytesOut += tcpClient.write(SE);
+                     {
+                        uint8_t buf[] = {IAC,SE};
+                        bytesOut += tcpClient.write(buf,sizeof(buf));
+                     }
                      break;
                   default:
                      break;
@@ -220,6 +247,30 @@ int receiveTcpData() {
                break;
          }
          rxByte = -1;
+
+
+         delay(0);
+         
+         //Send our minimum options 
+         if (minTelnetOptionsPending)
+         {
+            {
+               uint8_t buf[] = {IAC,DO,ECHO};
+               bytesOut += tcpClient.write(buf,sizeof(buf));
+            }
+
+            {
+               uint8_t buf[] = {IAC,WILL,SUP_GA};
+               bytesOut += tcpClient.write(buf,sizeof(buf));
+            }
+
+            {
+               uint8_t buf[] = {IAC,DO,SUP_GA};
+               bytesOut += tcpClient.write(buf,sizeof(buf));
+            }
+
+            minTelnetOptionsPending = false;
+         }
       }
 #if DEBUG
       Serial.print(']');
@@ -520,25 +571,42 @@ SerialConfig getSerialConfig(void) {
    return (SerialConfig)serialConfig;
 }
 
-// As the ESP8266 is being used as a modem (DCE) in this application,
-// I've reversed the naming of RTS/CTS to match what they'd be on
-// a modem. The usual naming is correct if the ESP8266 is wired up as
-// a DTE, but kept confusing me here as it's wired up as a DCE.
-void setHardwareFlow(void) {
-   // Enable flow control of DTE -> ESP8266 data with CTS
-   // CTS on the EPS8266 is pin GPIO15 which is physical pin 16
-   // CTS is an output and should be connected to CTS on the RS232
+
+void setHardwareFlow(boolean enabled) {
+   
+   // Enable flow control of PCW -> ESP8266 data with RTS
+   // RTS = D8 = GPIO15 => U0RTS (Output) (ESP tells PCW if it is ready for data by pulling low)   
+   // RTS is an output  and should be connected to CTS on PCW side - ESP will pull low to say it is ready to recieve
    // The ESP8266 has a 128 byte receive buffer,
    // so a threshold of 64 is half full
-   pinMode(CTS, FUNCTION_4); // make pin U0CTS
-   SET_PERI_REG_BITS(UART_CONF1(0), UART_RX_FLOW_THRHD, 64, UART_RX_FLOW_THRHD_S);
-   SET_PERI_REG_MASK(UART_CONF1(0), UART_RX_FLOW_EN);
+   if (enabled)
+   {
+      pinMode(RTS, FUNCTION_4); // make pin FlowControl
+      //PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_UART0_RTS); - alternative way ? 
+      
+      SET_PERI_REG_BITS(UART_CONF1(0), UART_RX_FLOW_THRHD, 64, UART_RX_FLOW_THRHD_S);
+      SET_PERI_REG_MASK(UART_CONF1(0), UART_RX_FLOW_EN);
 
-   // Enable flow control of ESP8266 -> DTE data with RTS
-   // RTS on the EPS8266 is pin GPIO13 which is physical pin 7
-   // RTS is an input and should be connected to RTS on the RS232
-   pinMode(RTS, FUNCTION_4); // make pin U0RTS
-   SET_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);
+
+      // Enable flow control of ESP8266 -> PCW data with CTS
+      // CTS = D7 = GPIO13 => U0CTS (Input)  (PCW tells ESP if it is ready for data by pulling low)
+      // CTS is an input and should be connected to DTR on PCW side - PCW will pull low to say DTR i.e it is Ready to receive
+
+      pinMode(CTS, FUNCTION_4); //  pin FlowControl
+      //PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_UART0_CTS); - alternative way ? 
+
+      SET_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);  
+   }
+   else
+   {
+      //DISABLE FLOW CONTROL
+      CLEAR_PERI_REG_MASK(UART_CONF1(0), UART_RX_FLOW_EN);
+      CLEAR_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);
+
+      //MAKE RTS LOW OUTPUT (to prevent SIO not ready issue on PCW if its in H/W flow control mode itself )
+      pinMode(RTS, OUTPUT);
+      digitalWrite(RTS,LOW);
+   }
 }
 
 // trim leading and trailing blanks from a string
@@ -759,4 +827,3 @@ static bool PagedOut(const __FlashStringHelper *flashStr, bool reset=false) {
 	str[(sizeof str)-1] = 0;
 	return PagedOut(str, reset);
 }
-

@@ -21,11 +21,31 @@
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+// see: https://github.com/mecparts/RetroWiFiModem 
+
+/* REQUIRED TO PREVENT MODEM RESET BY WATCHDOG
+What I did to quiet the watchdog down both when sending long strings at low baud rates and during long waits for RTS to come active again was to add a yield() call to the dead spin while loop, like so:
+
+In cores/esp8266/uart.cpp
+
+static void
+uart_do_write_char(const int uart_nr, char c)
+{
+    while(uart_tx_fifo_full(uart_nr))
+      yield();
+
+    USF(uart_nr) = c;
+}
+This way, no matter how long the code has to wait for space in the transmit FIFO, the watchdog is kept well fed and quiet.
+*/
+
+
 #include <ESP8266WiFi.h>
 #include <ESP_EEPROM.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <uart_register.h>
+#include <uart.h>
 #include <string.h>
 #include "RetroWiFiModem.h"
 #include "globals.h"
@@ -33,6 +53,7 @@
 #include "at_basic.h"
 #include "at_extended.h"
 #include "at_proprietary.h"
+#include "string.h"
 
 // =============================================================
 void setup(void) {
@@ -50,6 +71,8 @@ void setup(void) {
 
    EEPROM.begin(sizeof(struct Settings));
    EEPROM.get(0, settings);
+
+   //Force defaults
    if( settings.magicNumber != MAGIC_NUMBER ) {
       // no valid data in EEPROM/NVRAM, populate with defaults
       factoryDefaults(NULL);
@@ -58,9 +81,10 @@ void setup(void) {
 
    Serial.begin(settings.serialSpeed, getSerialConfig());
    digitalWrite(TXEN, LOW);      // enable the TX output
-   if( settings.rtsCts ) {
-      setHardwareFlow();
-   }
+
+   
+   setHardwareFlow(settings.rtsCts);
+   
    if( settings.startupWait ) {
       while( true ) {            // wait for a CR
          yield();
@@ -106,6 +130,31 @@ void setup(void) {
    }
 }
 
+
+//I added this to stop serial writes from blocking the loop - so other functions can happen
+//although the patch to UART.cpp would stop watchdog on blocked serial out, why not get on with other stuff instead
+//(eg sending or handling call disconnect) while waiting for tx buffer to clear.
+
+/*
+  Reference for uart_tx_fifo_available() and uart_tx_fifo_full():
+  -Espressif Techinical Reference doc, chapter 11.3.7
+  -tools/sdk/uart_register.h
+  -cores/esp8266/esp8266_peri.h
+  */
+inline size_t
+uart_tx_fifo_available(const int uart_nr)
+{
+    return (USS(uart_nr) >> USTXC) & 0xff;
+}
+
+inline bool
+uart_tx_fifo_full(const int uart_nr)
+{
+    return uart_tx_fifo_available(uart_nr) >= 0x7f;
+}
+
+
+
 // =============================================================
 void loop(void) {
 
@@ -136,7 +185,7 @@ void loop(void) {
             sendSerialData();
          }
 
-         while( tcpClient.available() && !Serial.available() ) { // data from WiFi to RS-232
+         while( tcpClient.available() && !Serial.available() && !uart_tx_fifo_full(0) ) { // data from WiFi to RS-232
             int c = receiveTcpData();
             if( c != -1 ) {
                Serial.write((char)c);

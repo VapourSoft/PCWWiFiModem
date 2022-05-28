@@ -50,6 +50,7 @@
    unsigned atCmdLen = 0;
 
    enum {CMD_NOT_IN_CALL, CMD_IN_CALL, ONLINE, PASSWORD} state = CMD_NOT_IN_CALL;
+   bool minTelnetOptionsPending = false; //When true send our minimum telnet options to server
 
    bool     ringing = false;     // no incoming call
    uint8_t  ringCount = 0;       // current incoming call ring count
