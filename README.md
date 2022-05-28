@@ -5,6 +5,7 @@ This is a fork of the original fantastic Retro WiFi modem, with customization fo
 Please see the original project for more information on the Retro WiFi modem, it's history, and hardware.  
 
 ### Notable Changes
+
 1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
 2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
 3. Changes to CTS/RTS handling to match the hardware
@@ -85,11 +86,8 @@ AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li>
 
 ### Updating the Software
 
-While I liked the idea of being able to update the software OTA, it
-seemed to make more sense in my situation to be able to *push* a new
-version as I built it rather than have the modem *pull* it. So that's
-what I did. It uses the default OTA upload capability built into the
-Arduino IDE.
+It can be updated using the default OTA upload capability built into the
+Arduino IDE and platformio.
 
 **Jan 24/22:** It's been reported that the ESP8266 core is slightly
 snafu'd at the moment, and that it's breaking things in the modem
@@ -99,7 +97,7 @@ ages; "if it isn't broken, don't break it", and everything still works
 for me. The bin file can be uploaded with the *espota.py* tool in the
 ESP8266 tool directory tree.
 
-### This version pins the platform io core to espressif8266@2.6.3 to get round this
+#### This version pins the platform io core to espressif8266@2.6.3 to get round this
 
 (If TPTB have deleted/renamed/moved that tool in the current core,
 you'll have to figure out how to do a manual OTA update.)
@@ -162,20 +160,12 @@ uart_do_write_char(const int uart_nr, char c)
 This way, no matter how long the code has to wait for space in the
 transmit FIFO, the watchdog is kept well fed and quiet.
 
-## This patch is implmented for platform io using a python script
+### The above patch is applied using platform io and a python script
 see ./patches for more info
-however this version also checks for a full buffer before trying to send a byte to the serial port,
-so this may be enough on its own to avoid the need for the patch under normal circumstances.  An exception
+Please note however this version also checks for a full buffer before trying to send a byte to the serial port,
+and this may be enough on its own to avoid the need for the patch under normal circumstances.  An exception
 could be that the DTR becomes not ready in the short space of time between checking and sending 
 (presumably for reasons unrelated to the data flow) so I leave it in.
-
-## 
-
-* [WiFi232 - An Internet Hayes Modem for your Retro Computer](http://biosrhythm.com/?page_id=1453)<br>
-* [WiFi232's Evil Clone](https://forum.vcfed.org/index.php?threads/wifi232s-evil-clone.1070412/)<br>
-* [Jussi Salin's Virtual modem for ESP8266](https://github.com/jsalin/esp8266_modem)<br>
-* [Stardot's ESP8266 based virtual modem](https://github.com/stardot/esp8266_modem)<br>
-* [Roland Juno's ESP8266 based virtual modem](https://github.com/RolandJuno/esp8266_modem)
 
 ## References & Acknowledgements
 RetroWifiModem project!
