@@ -1,8 +1,8 @@
 # PCW WiFi modem
 
-This is a fork of the original fantastic Retro WiFi modem, with cusomization for a Amstrad PCW8256/8512 Wifi Modem
+This is a fork of the original fantastic Retro WiFi modem, with customization for an Amstrad PCW8256/8512 Wifi Modem
 
-Please see the original project for more information on Retro WiFi modem, it's history, and hardware.  
+Please see the original project for more information on the Retro WiFi modem, it's history, and hardware.  
 
 ### Notable Changes
 1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
