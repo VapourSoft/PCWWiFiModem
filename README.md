@@ -1,163 +1,18 @@
-# Retro WiFi modem
+# PCW WiFi modem
 
-## An ESP8266 based RS232 \<-\> WiFi modem with Hayes AT style commands and LED indicators
+This is a fork of the original fantastic Retro WiFi modem, with cusomization for a Amstrad PCW8256/8512 Wifi Modem
 
-![Front Panel](images/Front%20Panel.jpg "Front Panel")
+Please see the original project for more information on Retro WiFi modem, it's history, and hardware.  
 
-This project grew out of a desire to get an old Ampro LB+/Z80 hooked up
-to the Internet.
-
-Right from the start, I knew I wanted a row of LED indicators at the
-front of the modem so that it would be reminiscent of an old Hayes
-Smartmodem. (I briefly considered finding an old Smartmodem on eBay, but
-soon remembered that the case had in fact been made of metal; they don't
-build 'em like that anymore.)
-
-Since the modem was going to be hooked up to the Little Board's
-serial port, I needed an actual RS-232 level serial port, with either a
-DB-25 or DE-9 connector.
-
-And finally, since I wanted the Hayes style LEDs, I thought it would be
-handy to have the Hayes AT commands too, at least as close as I could
-manage.
-
-That was all I started with. I couldn't tell you how I stumbled across
-the whole WiFi modem thing; I can't even remember what terms I searched
-with but very quickly I came across the message thread at [WiFi232's
-Evil
-Clone](http://www.vcfed.org/forum/entry.php?740-WiFi232-s-Evil-Clone&bt=1056).
-Inspired by that, and [Paul Rickards'
-WiFi232](http://biosrhythm.com/?page_id=1453), and [Daniel Jameson's
-ESP8266 based virtual modem](https://github.com/stardot/esp8266_modem) I
-got started.
-
-I had a preliminary version put together and working by the first
-evening. Then the wholesale changes to the software began. And for the
-longest time, it looked like they'd never end. Eventually though, they
-calmed down and "wholesale changes" downshifted to "another tweak I'd
-like to make."
-
-The hardware didn't change nearly as much from beginning to end. I did
-the development on a Wemos D1 R1 and a little half length solderless
-breadboard mounted together. The plan for the final hardware was always
-to use a [Wemos D1
-mini](https://docs.wemos.cc/en/latest/d1/d1_mini.html). A MAX3232 took
-care of the 3.3V <-> RS-232 level shifting, and a 74HCT245 was used to
-drive the indicator LEDs.
-
-![Prototype](images/Prototype.jpg "Prototype")
-
-The only major addition to the hardware during development was an OR
-gate on the serial output from the ESP8266. On startup, the ESP8266
-sends out some debug information (at an oddball baud rate) through the
-serial port. It shows up as garbage characters to whatever's hooked up
-to the serial port. It annoyed me enough that I fed the Tx signal
-through the OR gate, with the other input hooked up to an output pin
-that I could count on remaining high (thereby masking off the Tx signal)
-until after the sketch had started and set it low.
-
-## The Hardware
-
-![Interior](images/Interior.jpg "Interior")
-
-I made the decision to use through hole components throughout; retro
-components for a retro modem. Besides, I already had most of them in my
-parts box!
-
-In keeping with the retro theme, the modem uses classic Hayes style
-blinking LEDs and a DE-9F for the RS-232 connector. Everything is
-displayed: RTS, CTS, DSR, DTR, DCD, RI, TxD and RxD. However, only RxD,
-TxD, RTS and CTS are actually brought out on the DE-9F connector. The
-Ampro LB only brought those four signals out so it would have been
-overkill for the modem I was designing for it to support anything more.
-Additionally, it would have required another three MAX3232 ICs to do it
-(had the MAX3237 been available in DIP, I *might* have had a harder time
-saying no...).
-
-The PCB is laid out for a
-[Wemos D1 mini](https://docs.wemos.cc/en/latest/d1/d1_mini.html) and the
-software expects to see just that. If you're just using the software and
-not the PCB, there's no reason you couldn't use another kind of ESP8266
-board; I used a D1 R1 myself when I was developing the modem. You'd just
-need to add pin definitions for your board in RetroWiFiModem.h.
-
-A separate 3.3V regulator is used to power the MAX3232 IC and 74HC32
-quad OR gate. Some (most?) D1 mini clones have the smallest 3.3V
-regulator on board that they can get away with to power the board, and
-they don't have a lot of mA's left over to power anything else. Better
-safe than sorry.
-
-![Back Panel](images/Back%20panel.jpg "Back Panel")
-
-The power connector expects a 2.1mm I.D. x 5.5mm O.D. barrel plug,
-delivering 5 volts, centre positive.  I used a Tri-Mag L6R06H-050 (5V,
-1.2A), [DigiKey part#
-364-1251-ND](https://www.digikey.com/product-detail/en/tri-mag-llc/L6R06H-050/364-1251-ND/7682614).
-If you plug in a 9V adapter like you'd use for an Arduino, you *will*
-let the magic smoke out and have an ex-modem on your hands.
-
-![Schematic](images/RetroWiFiModem.sch.png "Schematic")
-
-On the off chance that there's someone else out there with a well
-stocked parts box and a burning desire to put together their own WiFi
-modem, there's a [BOM](kicad/RetroWiFiModem-kicad4-bom.csv) in the kicad
-sub directory. If you actually had to go out and buy all the parts, it
-really wouldn't be cost effective.
-
-Then again, how practical is getting an Ampro Little Board on the
-Internet? Practicality isn't always everything. Sometimes nostalgia is
-worth the effort.
-
-### Didn't make the cut
-
-I have to admit that I semi-seriously considered adding one of those
-little audio playback modules for faux dialing and connection sounds.
-It would have been in keeping with the whole retro theme. But in the end
-I decided not to. Maybe next time.
-
-## The case
-
-Like I said at the start, I would have loved to have used an old Hayes
-Smartmodem case, but they were metal and wouldn't have allowed the WiFi
-to work particularly well.
-
-In the end I went with a Hammond 1593N case (DigiKey part #
-[HM963-ND](https://www.digikey.com/en/products/detail/hammond-manufacturing/1593NBK/1090774)
-or [HM964-ND](https://www.digikey.com/en/products/detail/hammond-manufacturing/1593NGY/1090775)
-depending on whether you like black or grey). STL and OpenSCAD
-files are included for the front and back panels. You could use the
-proper Hammond red panel for the front (DigiKey part #
-[HM965-ND](https://www.digikey.com/en/products/detail/hammond-manufacturing/1593NIR10/1090776)),
-*but* they're only available in 10 packs and their price is highway robbery.
-I ended up using a slightly smaller red panel (DigiKey part #
-[HM889-ND](https://www.digikey.com/en/products/detail/hammond-manufacturing/1593SIR10/409899))
-that was much cheaper and available in single units.
-
-## The PCB
-
-The PCB includes cutouts for the two columns that join the case
-together, and mounting holes for the 6 standoffs. Also, there's an oddly
-shaped cutout in back end to allow a particular IDC DE-9F I had on hand.
-It's available from DigiKey (or a very close clone is) but it's fairly
-pricey. But there's plenty of room for an ordinary solder cup DE-9F.
-You'd most likely want to omit the 10 pin header and just wire the DE-9F
-right to the board.
-
-You might notice that the vias are unusually large by today's standards.
-The reason for that is to allow the option of constructing the PCB as a
-single sided board, replacing the top layer of copper with 11 jumpers.
-
-## The Software
-
-In a nod to its popularity, the command set I used largely follows that
-used in [Paul Rickards' WiFi232](http://biosrhythm.com/?page_id=1453)
-modem. Even if the innards are completely different, it made sense to
-make it *work* like what people were already used to. There's a reason
-everyone's been copying the Hayes command set for almost 40 years!
+#Notable Changes
+1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
+2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
+3. Changes to CTS/RTS handling to match the hardware
+4. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
 
 ### First time setup
 
-The default serial configuration is 1200bps, 8 data bits, no parity, 1
+The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
 Here's the commands you need to set up the modem to automatically
@@ -244,6 +99,8 @@ ages; "if it isn't broken, don't break it", and everything still works
 for me. The bin file can be uploaded with the *espota.py* tool in the
 ESP8266 tool directory tree.
 
+### This version pins the platform io core to espressif8266@2.6.3 to get round this
+
 (If TPTB have deleted/renamed/moved that tool in the current core,
 you'll have to figure out how to do a manual OTA update.)
 
@@ -305,52 +162,14 @@ uart_do_write_char(const int uart_nr, char c)
 This way, no matter how long the code has to wait for space in the
 transmit FIFO, the watchdog is kept well fed and quiet.
 
-## Status
+## This patch is implmented for platform io using a python script
+see ./patches for more info
+however this version also checks for a full buffer before trying to send a byte to the serial port,
+so this may be enough on its own to avoid the need for the patch under normal circumstances.  An exception
+could be that the DTR becomes not ready in the short space of time between checking and sending 
+(presumably for reasons unrelated to the data flow) so I leave it in.
 
-Is a personal project like this ever *really* finished? I've had two
-units assembled and in use since the spring of 2020, and while there's
-been some software changes since then, I really don't expect any more.
-There are no outstanding bugs that I'm aware of, and no new features on
-my wish list. For the time being at least, I think it's complete.
-
-### Linux, Telnet, Zmodem and downloading binary files
-
-Have you used the modem to 'dial' into a Linux box? And have you done a
-`sz binary_file` on the Linux box? And at a completely reproducible
-point in the file, has the connection dropped? But other binary files
-work just fine? Then read on.
-
-This drove me slightly batty for months. I finally narrowed it down to
-trying to send blocks of binary data with a large number of FF bytes. I
-eventually created a test file consisting of 2K of FF and used that to
-test with. I could download it through the modem with Xmodem just fine.
-Ymodem also worked if I kept the block size down to 128 bytes - but the
-connection would drop instantly if I tried sending 1K blocks. Same thing
-with Zmodem.
-
-In fact, if I just tried `cat binary_file`, the connection would
-drop. Which eventually got me thinking. Sitting at the console on my
-main Linux box, I telnet'd to the same box and logged in. No WiFi modem
-involved anywhere, just a telnet session on the console to the same box.
-I then did a `cat binary_file`. The telnet connection dropped, and I
-was back in my original session.
-
-It's the Linux telnet daemon. Not the modem at all.
-
-To prove it to myself, I hooked up WiFi modems to two systems on their
-serial ports and had one dial into the other. I could send the all FF
-binary file back and forth with Zmodem and Ymodem, no trouble at all.
-
-But you really, really need to download that binary file through the
-modem from a telnet connection to a Linux box? You're not going to be
-able to use Zmodem. Ymodem will work (the sy command defaults to 128
-byte blocks), as will Xmodem. But not Zmodem.
-
-Oddly enough, the telnet daemon has no trouble *receiving* the all FF
-binary file. Only sending it. Your guess as to why is probably better
-than mine.
-
-## References
+## 
 
 * [WiFi232 - An Internet Hayes Modem for your Retro Computer](http://biosrhythm.com/?page_id=1453)<br>
 * [WiFi232's Evil Clone](https://forum.vcfed.org/index.php?threads/wifi232s-evil-clone.1070412/)<br>
@@ -358,12 +177,5 @@ than mine.
 * [Stardot's ESP8266 based virtual modem](https://github.com/stardot/esp8266_modem)<br>
 * [Roland Juno's ESP8266 based virtual modem](https://github.com/RolandJuno/esp8266_modem)
 
-## Acknowledgements
-
-* A whole lot of people owe a big vote of thanks to Jussi Salin for
-releasing their virtual modem code for the ESP8266 and starting the
-ball rolling.
-* Paul Rickards for an amazing bit of hardware to draw inspiration from.
-* All the Stardot contributors for their work.
-* And, of course, Dennis C. Hayes for creating something so simple and
-elegant that has stood the test of time.
+## References & Acknowledgements
+RetroWifiModem project!
