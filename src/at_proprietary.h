@@ -132,24 +132,30 @@ char *doSpeedChange(char *atCmd) {
          }
          if( newSerialSpeed != settings.serialSpeed ) {
             switch( newSerialSpeed ) {
-               case 110L:                       // 110 thru 76.8K are the
-               case 300L:                       // standard 'BYE' rates, if
-               case 450L:                       // you're wondering why
-               case 600L:                       // unusual rates like 110, 450
-               case 710L:                       // and 710 are in this list
+               case 110L:                       // 110 thru 76.8K are the  standard 'BYE' rates, if you're wondering why  unusual rates like 110, 450 and 710 are in this list
+               case 300L:                       
+               //case 450L:                     // Not supported on PCW
+               case 600L:                       
+               //case 710L:                     // Not supported on PCW
                case 1200L:
                case 2400L:
                case 4800L:
                case 9600L:
-               case 19200L:
-               case 38400L:
-               case 57600L:
-               case 76800L:
-               case 115200L:
+               case 19200L:                     
+               //case 38400L:                   // Not supported on PCW
+               //case 57600L:                   // Not supported on PCW
+               //case 76800L:                   // Not supported on PCW
+               //case 115200L:                  // Not supported on PCW
                   sendResult(R_OK);
                   Serial.flush();               // wait for transmit to finish
                   digitalWrite(TXEN, HIGH);     // disable the TX output
-                  Serial.updateBaudRate(newSerialSpeed);
+
+                  if ( newSerialSpeed == 19200)
+                     //The output from counter IC on PCW WiFi Modem board when &00, &07 is written to the register actually results in 17857 BAUD!
+                     uart_div_modify(0, UART_CLK_FREQ / 17857 );
+                  else
+                     Serial.updateBaudRate(newSerialSpeed);
+
                   settings.serialSpeed = newSerialSpeed;
                   digitalWrite(TXEN, LOW);  // reenable the TX output
                   break;
