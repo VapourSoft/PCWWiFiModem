@@ -9,7 +9,9 @@ Please see the original project for more information on the Retro WiFi modem, it
 1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
 2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
 3. Changes to CTS/RTS handling to match the hardware
-4. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
+4. Changes to available baud rates - most notably a hack for the 19200 baud setting - the PCW WiFi modem timer does not generate the correct timing for this baud rate and so I have changed the ESP8266 to the non-standard baud rate to match in theis case.
+5. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
+6. Original hardware files have been removed, as this code is being developed on different hardware which is still in development
 
 ### First time setup
 
