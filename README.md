@@ -9,12 +9,16 @@ Please see the original project for more information on the Retro WiFi modem, it
 1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
 2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
 3. Changes to CTS/RTS handling to match the hardware
-4. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
+4. Changes to available baud rates - most notably a hack for the 19200 baud setting - the PCW WiFi modem timer does not generate the correct timing for this baud rate and so I have changed the ESP8266 to the non-standard baud rate to match in theis case.
+5. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
+6. Original hardware files have been removed, as this code is being developed on different hardware which is still in development
 
 ### First time setup
 
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
+
+NOTE: If you get data corruption when using this baud rate or higher, you probably need to enable Hardware flow control or go slower.  The PCW version of QTERM does not require this (at least for 9600 baud) as it goes direct to the hardware and is fast enough to handle the data rate.  MAIL232 most certainly is not.
 
 Here's the commands you need to set up the modem to automatically
 connect to your WiFi network:
