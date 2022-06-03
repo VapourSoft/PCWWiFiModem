@@ -18,6 +18,8 @@ Please see the original project for more information on the Retro WiFi modem, it
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
+NOTE: If you get data corruption when using this baud rate or higher, you probably need to enable Hardware flow control or go slower.  The PCW version of QTERM does not require this (at least for 9600 baud) as it goes direct to the hardware and is fast enough to handle the data rate.  MAIL232 most certainly is not.
+
 Here's the commands you need to set up the modem to automatically
 connect to your WiFi network:
 
