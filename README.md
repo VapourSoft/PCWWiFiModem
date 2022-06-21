@@ -1,24 +1,26 @@
 # PCW WiFi modem
 
-This is a fork of the original fantastic Retro WiFi modem, with customization for an Amstrad PCW8256/8512 Wifi Modem
+This is a fork of Retro WiFi modem with customization for an Amstrad PCW8256/8512 Wifi Modem
 
-Please see the original project for more information on the Retro WiFi modem, it's history, and hardware.  
+Please see the original project for more information on the Retro WiFi modem including it's history, contributors and hardware.  
 
-### Notable Changes
+## Notable Changes
 
-1. Some fixes to telnet command handling.  I observed telnet commands being split across packets which prevented negotiation from working properly.
-2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers (particuarly MUDs and Kermit)
-3. Changes to CTS/RTS handling to match the hardware
-4. Changes to available baud rates - most notably a hack for the 19200 baud setting - the PCW WiFi modem timer does not generate the correct timing for this baud rate and so I have changed the ESP8266 to the non-standard baud rate to match in theis case.
+1. Some fixes to telnet command handling.  Telnet commands were being split across packets which could prevent negotiation from working properly.
+2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers
+3. Changes to CTS/RTS handling for compatibility with the PCW hardware
+4. Changes to available baud rates - most notably a hack for the 19200 baud setting - the PCW WiFi modem timer does not generate the exact timing for this rate and so  the ESP8266 baud rate has been changed to accomodate this.
 5. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
-6. Original hardware files have been removed, as this code is being developed on different hardware which is still in development
+6. Original hardware files have been replaced with the schematic and BOM for the PCW WiFi modem
 
-### First time setup
+## First time setup
+
+#### Warning: Never attach or remove peripherals from the PCW expansion port while the machine is switched on!
 
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
-NOTE: If you get data corruption when using this baud rate or higher, you probably need to enable Hardware flow control or go slower.  The PCW version of QTERM does not require this (at least for 9600 baud) as it goes direct to the hardware and is fast enough to handle the data rate.  MAIL232 most certainly is not.
+NOTE: It seems that 9600 baud is a bit fast for CP/M on the PCW to keep up with, however enabling hardware flow control on both the modem and PCW will solve this.  The PCW version of QTERM (recommended) is a lot faster as it goes direct to the hardware and you may not need flow control using this at higher speeds.
 
 Here's the commands you need to set up the modem to automatically
 connect to your WiFi network:
@@ -39,7 +41,7 @@ Once you've done that, the modem will automatically connect to your WiFi
 network on power up and will be ready to "dial up" a connection with
 ATDT.
 
-### Command Reference
+## Command Reference
 
 Multiple AT commands can be typed in on a single line. Spaces between
 commands are allowed, but not within commands (i.e. AT S0=1 X1 Q0 is
@@ -88,88 +90,30 @@ AT$TTS?<br>AT$TTS=*WxH* | Query or change the window size (columns x rows) to be
 AT$TTY?<br>AT$TTY=*terminal type* | Query or change the terminal type to be returned when the Telnet server issues a TERMINAL-TYPE request. The default value is "ansi".
 AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li><li>$W=1 Wait for the return key to be pressed at startup.</li></ul>
 
-### Updating the Software
+## Building the hardware
+Please refer to the wiki
 
-It can be updated using the default OTA upload capability built into the
-Arduino IDE and platformio.
+## Building the firmware
 
 **Jan 24/22:** It's been reported that the ESP8266 core is slightly
 snafu'd at the moment, and that it's breaking things in the modem
-software. As a workaround, I've added the bin file that gets uploaded
-to the modem in the repository. I haven't updated my ESP8266 core in
-ages; "if it isn't broken, don't break it", and everything still works
-for me. The bin file can be uploaded with the *espota.py* tool in the
-ESP8266 tool directory tree.
+software...
 
-#### This version pins the platform io core to espressif8266@2.6.3 to get round this
+#### Building with Arduino IDE
+Please ensure you use ESP8266 core 2.7.4 as a workaround.
+You may need to rename .cpp files to .ino for builds to work.
 
-(If TPTB have deleted/renamed/moved that tool in the current core,
-you'll have to figure out how to do a manual OTA update.)
+#### Building with PlatformIO
+platformio.ini pins the platform io core to espressif8266@2.6.3 as a workaround
 
-### RTS/CTS handshaking and a dead spin loop issue
+## Flashing the firmware
+This can be done through Arduino IDE or PlatformIO after a successfull build.
+Alternatively the pre-built bin file under releases can be uploaded with the *espota.py* tool in the ESP8266 tool directory tree.
 
-Something I noticed with ESP8266 software that puzzled me was the
-number of places I saw a series of Serial print statements being broken
-up with calls to yield(), like so:
+(If TPTB have deleted/renamed/moved that tool in the current core, you'll have to figure out how to do a manual OTA update.)
 
-```
-   Serial.print("Hello world!\n");
-   yield();
-   Serial.print("How are you today?\n");
-   yield();
-```
-It didn't take long to figure out what was going on; The print() call
-was blocking, and at lower baud rates, even printing a few relatively
-short strings was enough to cause the watchdog to bark and cause a
-reset. So the repetitive yield() calls were an attempt to feed the
-watchdog often enough to keep it from barking.
-
-What does this have to do with RTS/CTS handshaking? Simply put,
-lowering RTS for more than a few seconds was causing the watchdog to
-bark as well. So I started digging.
-
-In cores/esp8266/uart.cpp I found the following function:
-
-```
-static void
-uart_do_write_char(const int uart_nr, char c)
-{
-    while(uart_tx_fifo_full(uart_nr));
-
-    USF(uart_nr) = c;
-}
-```
-
-This is the low level function that everything calls to send a character
-out the serial port. The cause of the watchdog barking is in the dead
-spin while loop. It waits until there's room in the transmit FIFO to add
-another character. So if RTS/CTS handshaking is enabled, and RTS is low
-for longer than the watchdog likes: woof.
-
-What I did to quiet the watchdog down both when sending long strings at
-low baud rates and during long waits for RTS to come active again was to
-add a yield() call to the dead spin while loop, like so:
-
-```
-static void
-uart_do_write_char(const int uart_nr, char c)
-{
-    while(uart_tx_fifo_full(uart_nr))
-      yield();
-
-    USF(uart_nr) = c;
-}
-```
-
-This way, no matter how long the code has to wait for space in the
-transmit FIFO, the watchdog is kept well fed and quiet.
-
-### The above patch is applied using platform io and a python script
-see ./patches for more info
-Please note however this version also checks for a full buffer before trying to send a byte to the serial port,
-and this may be enough on its own to avoid the need for the patch under normal circumstances.  An exception
-could be that the DTR becomes not ready in the short space of time between checking and sending 
-(presumably for reasons unrelated to the data flow) so I leave it in.
+## Updating the firmware
+After the software has been flashed for the first time via USB, providing a WiFi connection has been established, the D1 Mini can be updated using the default OTA upload capability built into the Arduino IDE and platformio.
 
 ## References & Acknowledgements
-RetroWifiModem project!
+RetroWifiModem project et all!
