@@ -1,19 +1,10 @@
 # PCW WiFi modem
 
-This is a fork of Retro WiFi modem with customization for an Amstrad PCW8256/8512 Wifi Modem
-
-Please see the original project for more information on the Retro WiFi modem including it's history, contributors and hardware.  
+This is a fork of the RetroWiFiModem project with customization for building an Amstrad PCW8256/8512 Wifi Modem
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
-## Notable Changes
-
-1. Some fixes to telnet command handling.  Telnet commands were being split across packets which could prevent negotiation from working properly.
-2. Slight change to handling of some telnet commands to facilitate better compatibility with some telnet servers
-3. Changes to CTS/RTS handling for compatibility with the PCW hardware
-4. Changes to available baud rates - most notably a hack for the 19200 baud setting - the PCW WiFi modem timer does not generate the exact timing for this rate and so  the ESP8266 baud rate has been changed to accomodate this.
-5. Change to allow flow control to be turned on and off during a session without saving the settings and rebooting the modem.
-6. Original hardware files have been replaced with the schematic and BOM for the PCW WiFi modem
+Please see the original project for more information on the Retro WiFi modem including it's history, contributors and hardware.  
 
 ## First time setup
 
