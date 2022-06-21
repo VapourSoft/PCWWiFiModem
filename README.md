@@ -4,7 +4,7 @@ This is a fork of the RetroWiFiModem project with customization for building an 
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
-Please see the original project for more information on the Retro WiFi modem including it's history, contributors and hardware.  
+Please see the original project for more information on the RetroWiFiModem including it's history, contributors and original hardware.  
 
 ## First time setup
 
