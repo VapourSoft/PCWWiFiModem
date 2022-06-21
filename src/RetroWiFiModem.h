@@ -2,7 +2,7 @@
    #define _MODEM_H
 
    #define DEBUG                 0
-   #define DEFAULT_SPEED         1200
+   #define DEFAULT_SPEED         9600
 
    #define RING_INTERVAL         1500
    #define MAX_CMD_LEN           256
