@@ -93,20 +93,18 @@ snafu'd at the moment, and that it's breaking things in the modem
 software...
 
 #### Building with Arduino IDE
-Please ensure you use ESP8266 core 2.7.4 as a workaround.
-You may need to rename .cpp files to .ino for builds to work.
+You will probably need to rename .cpp files to .ino to build with the Arduino IDE.
+Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
 
 #### Building with PlatformIO
-platformio.ini pins the platform io core to espressif8266@2.6.3 as a workaround
+platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a workaround for the ESP8266 core issue mentioned above.
 
 ## Flashing the firmware
 This can be done through Arduino IDE or PlatformIO after a successfull build.
-Alternatively the pre-built bin file under releases can be uploaded with the *espota.py* tool in the ESP8266 tool directory tree.
-
-(If TPTB have deleted/renamed/moved that tool in the current core, you'll have to figure out how to do a manual OTA update.)
+Alternatively the pre-built firmware bin under "releases" can be uploaded using the *esptool.py* or *espota.py* tool in the ESP8266 framework's tools directory.
 
 ## Updating the firmware
-After the software has been flashed for the first time via USB, providing a WiFi connection has been established, the D1 Mini can be updated using the default OTA upload capability built into the Arduino IDE and platformio.
+The firmware can be updated "over the air" providing a WiFi connection has been established, using the default OTA upload capability through Arduino IDE, platformio (see platformio.ini), or espota.py
 
 ## References & Acknowledgements
 RetroWifiModem project et all!
