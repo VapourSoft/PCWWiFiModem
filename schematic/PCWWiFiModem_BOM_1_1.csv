@@ -1,0 +1,14 @@
+Reference, Value, Component, Notes
+HEADER, 50pin Centronics (Plug/Male) (straight pin),Z80 bus connector,"Ensure compatible 2.16mm pitch and 4.29mm row spacing.  Example Centronics NorComp 111-050-113L001"
+7 x 100nf,0.1uf / 100nf,Radial Leaded Ceramic Capacitor,e.g. K104M15X7RF53L2
+74LS74,SN74LS74AN,SN74LS74AN,
+8254,8253 / 8254,e.g. D8253C-2,"Out of production, currently available on eBay etc"
+R1,3k3,Generic 1/4W resistor small,
+74LS32,SN74LS32N,SN74LS32N,
+Z80DART,Z8470A-PS,e.g.  Z8470A-PS,"Out of production, currently available on eBay etc"
+SparkFun Logic Conv,3.3 to 5v Bidirectional logic converter,SparkFun Logic Converter,Clones available but check pinout compatible with board
+Wemos D1 Mini,Wemos D1 Mini,Wemos D1 Mini,
+74LS00,SN74LS00N,SN74LS00N,
+74LS138,SN74LS138N,SN74LS138N,
+,,,
+It is strongly suggested to use IC sockets for all ICs,,,
