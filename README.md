@@ -4,6 +4,8 @@ This is a fork of Retro WiFi modem with customization for an Amstrad PCW8256/851
 
 Please see the original project for more information on the Retro WiFi modem including it's history, contributors and hardware.  
 
+Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
+
 ## Notable Changes
 
 1. Some fixes to telnet command handling.  Telnet commands were being split across packets which could prevent negotiation from working properly.
