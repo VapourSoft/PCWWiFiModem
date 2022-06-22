@@ -1,14 +1,19 @@
-Reference, Value, Component, Notes
-HEADER, 50pin Centronics (Plug/Male) (straight pin),Z80 bus connector,"Ensure compatible 2.16mm pitch and 4.29mm row spacing.  Example Centronics NorComp 111-050-113L001"
-7 x 100nf,0.1uf / 100nf,Radial Leaded Ceramic Capacitor,e.g. K104M15X7RF53L2
-74LS74,SN74LS74AN,SN74LS74AN,
-8254,8253 / 8254,e.g. D8253C-2,"Out of production, currently available on eBay etc"
-R1,3k3,Generic 1/4W resistor small,
-74LS32,SN74LS32N,SN74LS32N,
-Z80DART,Z8470A-PS,e.g.  Z8470A-PS,"Out of production, currently available on eBay etc"
-SparkFun Logic Conv,3.3 to 5v Bidirectional logic converter,SparkFun Logic Converter,Clones available but check pinout compatible with board
-Wemos D1 Mini,Wemos D1 Mini,Wemos D1 Mini,
-74LS00,SN74LS00N,SN74LS00N,
-74LS138,SN74LS138N,SN74LS138N,
-,,,
-It is strongly suggested to use IC sockets for all ICs,,,
+Reference, Value, Component,Estimated GBP excl taxes and p&p,Notes / Examples
+HEADER, 50pin Centronics (Plug/Male) (straight pin) 2.16mm pitch and 4.29mm row spacing,Z80 bus connector, £6.05 ,https://www.mouser.co.uk/ProductDetail/NorComp/111-050-113L001?qs=IGgAdOvCTsQc%252BHRn9uTSXA%3D%3D
+7 x 100nf,0.1uf / 100nf,Radial Leaded Ceramic Capacitor, £1.45 ,https://www.mouser.co.uk/ProductDetail/Vishay-BC-Components/K104M15X7RF53L2?qs=9AX3phJxokWIpR5WRGtIJw%3D%3D
+74LS74,SN74LS74AN,SN74LS74AN, £0.57 ,https://www.mouser.co.uk/ProductDetail/Texas-Instruments/SN74LS74AN?qs=b0gIXGU74fP41yYZQO4%252BKQ%3D%3D
+R1,3k3,Generic 1/4W resistor small, £0.09 ,https://www.mouser.co.uk/ProductDetail/KOA-Speer/MF1-4LCT52R332J?qs=91WPSIiQh9Jr%252BW6GHT%252Bbwg%3D%3D
+74LS32,SN74LS32N,SN74LS32N, £0.64 ,https://www.mouser.co.uk/ProductDetail/Texas-Instruments/SN74LS32N?qs=q2XTDbzbm6DA9Mnew5GiLA%3D%3D
+SparkFun Logic Conv,3.3 to 5v Bidirectional logic converter,SparkFun Logic Converter, £2.35 ,https://www.mouser.co.uk/ProductDetail/SparkFun/BOB-12009?qs=WyAARYrbSnb%252BGYLWggQnjQ%3D%3D
+74LS00,SN74LS00N,SN74LS00N, £0.67 ,https://www.mouser.co.uk/ProductDetail/Texas-Instruments/SN74LS00N?qs=sGAEpiMZZMutXGli8Ay4kFSXmDbOg0RMt%252BjPcJdnFE4%3D
+74LS138,SN74LS138N,SN74LS138N, £0.70 ,https://www.mouser.co.uk/ProductDetail/Texas-Instruments/SN74LS138N?qs=sGAEpiMZZMutXGli8Ay4kKpsugRZTtn9oqwJFWQsBFc%3D
+,,,,
+8254,8253 / 8254,e.g. D8253C-2, £3.00 ,"Out of production, currently available on eBay etc"
+Z80DART,Z8470A-PS,e.g.  Z8470A-PS, £4.00 ,"Out of production, currently available on eBay etc"
+Wemos D1 Mini,Wemos D1 Mini,Wemos D1 Mini, £3.80 ,Available on eBay / Aliexpress etc
+,,,,
+,,Estimate GBP, £23.32 ,
+,,,,
+It is strongly suggested to use IC sockets for all ICs and the D1 Mini approx 1.70 GBP,,,,
+,,,,
+Mouser BOM/Project for some of the parts: ,https://www.mouser.co.uk/ProjectManager/ProjectDetail.aspx?AccessID=329ee45b5a,,,
