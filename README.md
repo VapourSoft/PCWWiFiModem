@@ -87,9 +87,7 @@ AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li>
 Please refer to the wiki: https://github.com/VapourSoft/PCWWiFiModem/wiki/Hardware-Assembly
 
 ## Flashing the firmware
-Pre-built firmware https://github.com/VapourSoft/PCWWiFiModem/releases can be uploaded using the *esptool.py* or *espota.py* tool in the ESP8266 framework's tools directory.
-or
-This can be done through Arduino IDE or PlatformIO after a successfull build.
+Pre-built firmware https://github.com/VapourSoft/PCWWiFiModem/releases can be uploaded using the *esptool.py* or *espota.py* tool in the ESP8266 framework's tools directory. Alternatively if you want to build the firmware yourself, this can be done through Arduino IDE or PlatformIO.
 
 ## Updating the firmware
 The firmware can be updated "over the air" providing a WiFi connection has been established using the default OTA upload capability accessible through Arduino IDE, PlatformIO (see platformio.ini), or espota.py
