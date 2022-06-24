@@ -84,7 +84,7 @@ AT$TTY?<br>AT$TTY=*terminal type* | Query or change the terminal type to be retu
 AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li><li>$W=1 Wait for the return key to be pressed at startup.</li></ul>
 
 ## Building the hardware
-Please refer to the wiki
+Please refer to the wiki: https://github.com/VapourSoft/PCWWiFiModem/wiki/Hardware-Assembly
 
 ## Building the firmware
 
