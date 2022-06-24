@@ -1,6 +1,6 @@
 # PCW WiFi modem
 
-This is a fork of the RetroWiFiModem project with customization for building an Amstrad PCW8256/8512 Wifi Modem
+This is a fork of the RetroWiFiModem project with customization for building an Amstrad PCW8256/8512 Wifi Modem - Most notably without the need for a separate RS232 interface such as the CPS8256.
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
