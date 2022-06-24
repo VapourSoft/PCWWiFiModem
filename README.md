@@ -86,6 +86,14 @@ AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li>
 ## Building the hardware
 Please refer to the wiki: https://github.com/VapourSoft/PCWWiFiModem/wiki/Hardware-Assembly
 
+## Flashing the firmware
+Pre-built firmware https://github.com/VapourSoft/PCWWiFiModem/releases can be uploaded using the *esptool.py* or *espota.py* tool in the ESP8266 framework's tools directory.
+or
+This can be done through Arduino IDE or PlatformIO after a successfull build.
+
+## Updating the firmware
+The firmware can be updated "over the air" providing a WiFi connection has been established using the default OTA upload capability accessible through Arduino IDE, PlatformIO (see platformio.ini), or espota.py
+
 ## Building the firmware
 
 **Jan 24/22:** It's been reported that the ESP8266 core is slightly
@@ -93,18 +101,13 @@ snafu'd at the moment, and that it's breaking things in the modem
 software...
 
 #### Building with Arduino IDE
-You will probably need to rename .cpp files to .ino to build with the Arduino IDE.
 Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
+Also you will probably need to rename .cpp files to .ino to build with the Arduino IDE.
 
 #### Building with PlatformIO
 platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a workaround for the ESP8266 core issue mentioned above.
 
-## Flashing the firmware
-This can be done through Arduino IDE or PlatformIO after a successfull build.
-Alternatively the pre-built firmware bin under "releases" can be uploaded using the *esptool.py* or *espota.py* tool in the ESP8266 framework's tools directory.
 
-## Updating the firmware
-The firmware can be updated "over the air" providing a WiFi connection has been established, using the default OTA upload capability through Arduino IDE, platformio (see platformio.ini), or espota.py
 
 ## References & Acknowledgements
 RetroWifiModem project et all!
