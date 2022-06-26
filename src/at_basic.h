@@ -398,6 +398,7 @@ char *showNetworkInfo(char *atCmd) {
 	do {		// a Q&D hack to allow ^C to terminate the output at the
 		      // end of a page
 		if( PagedOut(F("Retro WiFi modem"), true) ) break;
+      if( PagedOut("Version....: " AUTO_VERSION) ) break;
 		if( PagedOut("Build......: " __DATE__ " " __TIME__) ) break;
 		snprintf_P(infoLine, sizeof infoLine, PSTR("Baud.......: %lu"), settings.serialSpeed);
 		if( PagedOut(infoLine) ) break;
