@@ -90,7 +90,7 @@ Please refer to the wiki: https://github.com/VapourSoft/PCWWiFiModem/wiki/Hardwa
 Pre-built firmware https://github.com/VapourSoft/PCWWiFiModem/releases can be uploaded using the *esptool.py* tool in the ESP8266 framework's tools directory. 
 
 e.g.
-python -m esptool --chip esp8266 --port COM7 write_flash --flash_mode dio --flash_size detect 0x0 "firmware.bin"
+ `python -m esptool --chip esp8266 --port COM7 write_flash --flash_mode dio --flash_size detect 0x0 "firmware.bin"`
 
 ## Updating the firmware
 Once flashed and the connection to WiFi is configured, firmware can also be updated through WiFi using the default OTA upload capability in Arduino IDE, PlatformIO (see platformio.ini), or the ESP8266 framework's espota.py
