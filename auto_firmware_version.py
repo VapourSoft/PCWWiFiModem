@@ -8,7 +8,7 @@ def get_firmware_specifier_build_flag():
 
     if isRelease == 'true':
         #Ensure no changes
-        ret = subprocess.run(["git", "diff --quiet"], stdout=subprocess.PIPE, text=True) #Uses only annotated tags
+        ret = subprocess.run(["git", "diff","--quiet"], stdout=subprocess.PIPE, text=True) 
         if ret.returncode == 1 :
             print ("ERROR: Cant build release - There are local or untracked changes")
             env.Exit(1);
