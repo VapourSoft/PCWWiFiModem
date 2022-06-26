@@ -18,7 +18,7 @@ def get_firmware_specifier_build_flag():
 
     build_version = ret.stdout.strip()
 
-    if (isRelease == 'true' and build_version.find('-')):
+    if (isRelease == 'true' and build_version.find('-') != -1 ):
         print ("ERROR: Cant build release - Tag is not on current commit!")
         env.Exit(1);
 
