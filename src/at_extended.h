@@ -32,10 +32,10 @@ char *factoryDefaults(char *atCmd) {
    settings.verbose = true;
    settings.quiet = false;
 
-   strcpy(settings.alias[0], "particles");
-   strcpy(settings.speedDial[0], "+particlesbbs.dyndns.org:6400");
-   strcpy(settings.alias[1], "altair");
-   strcpy(settings.speedDial[1], "altair.virtualaltair.com:4667");
+   strcpy(settings.alias[0], "aardwolf");
+   strcpy(settings.speedDial[0], "aardwolf.org:23");
+   strcpy(settings.alias[1], "simulant");
+   strcpy(settings.speedDial[1], "amstrad.simulant.uk:464");
    strcpy(settings.alias[2], "heatwave");
    strcpy(settings.speedDial[2], "heatwave.ddns.net:9640");
 

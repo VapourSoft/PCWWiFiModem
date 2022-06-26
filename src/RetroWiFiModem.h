@@ -70,14 +70,10 @@
 
    #define ACTIVE LOW           // RS232 control signals are active low
 
-   // As the ESP8266 is being used as a modem (DCE) in this application,
-    // I've reversed the naming of RTS/CTS to match what they'd be on
-    // a modem. The usual naming is correct if the ESP8266 is wired up as
-    // a DTE, but kept confusing me here as it's wired up as a DCE.
    #ifdef ARDUINO_ESP8266_WEMOS_D1R1
       // D1 R1 pins
-      #define CTS D10           // (GPIO15) output
-      #define RTS D11           // (GPIO13) input
+      #define CTS D11           // (GPIO13) output
+      #define RTS D10           // (GPIO15) input
       #define RI  D12           // (GPIO12) output
       #define DSR D4            // (GPIO04) output
       #define DCD D3            // (GPIO05) output

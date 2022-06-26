@@ -58,6 +58,9 @@ void sendSerialData() {
    }
    Serial.readBytes(txBuf, len);
 
+   if (telnetLocalEcho)
+      Serial.write(txBuf,len);
+
    if( escCount || (millis() - lastSerialData >= GUARD_TIME) ) {
       // check for the online escape sequence
       // +++ with a 1 second pause before and after
@@ -180,9 +183,20 @@ int receiveTcpData() {
                      break;
                }
                break;
+
+            case WONT: 
+               // Server says it wont do something ... 
+               switch (cmdByte2 ) {
+                  case ECHO :
+                     // In this case we have asked server to echo and it has refused, this is often the case with MUDs
+                     // so we need to echo ourself
+                     telnetLocalEcho = true;
+                     break;
+               }
+               break; 
+
             case WILL:
                // Server wants to do option, allow most
-
                if (cmdByte2 > ((uint8_t)49) ) // DONT non-standard features
                      {
                         uint8_t buf[] = {IAC,DONT,cmdByte2};
@@ -191,6 +205,9 @@ int receiveTcpData() {
                else
                {
                   switch( cmdByte2 ) {
+                     case ECHO:
+                        telnetLocalEcho = false; //We dont need to echo as server WILL
+                        break;
                      case LINEMODE:
                      case NAWS:
                      case LFLOW:

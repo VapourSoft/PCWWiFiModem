@@ -166,12 +166,18 @@ char *dialNumber(char *atCmd) {
       Serial.flush();
    }
    delay(2000);   // delay for ZMP to be able to detect CONNECT
-   if( !Serial.available() && tcpClient.connect(host, portNum) ) {
+   
+   //Clear any extraneous input from serial before making connection
+   while (Serial.available())
+      Serial.read();
+
+   if( tcpClient.connect(host, portNum) && !Serial.available() ) {
       connectTime = millis();
       sendResult(R_CONNECT);
       digitalWrite(DCD, ACTIVE);
       state = ONLINE;
       minTelnetOptionsPending = !(sessionTelnetType == NO_TELNET);
+      telnetLocalEcho = !(sessionTelnetType == NO_TELNET); 
       yield();
    } else {
       sendResult(R_NO_CARRIER);
@@ -443,6 +449,8 @@ char *showNetworkInfo(char *atCmd) {
 		snprintf_P(infoLine, sizeof infoLine, PSTR("Bytes in...: %lu"), bytesIn);
 		if( PagedOut(infoLine) ) break;
 		snprintf_P(infoLine, sizeof infoLine, PSTR("Bytes out..: %lu"), bytesOut);
+		if( PagedOut(infoLine) ) break;
+		snprintf_P(infoLine, sizeof infoLine, PSTR("Clock Freq.: %u mhz"), ESP.getCpuFreqMHz() );
 		if( PagedOut(infoLine) ) break;
 		snprintf_P(infoLine, sizeof infoLine, PSTR("Heap free..: %lu"), ESP.getFreeHeap());
 		if( PagedOut(infoLine) ) break;
