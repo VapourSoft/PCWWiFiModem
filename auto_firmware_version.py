@@ -17,7 +17,11 @@ def get_firmware_specifier_build_flag():
         ret = subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE, text=True) #Uses any tags
 
     build_version = ret.stdout.strip()
-    
+
+    if (isRelease == 'true' and build_version.find('-')):
+        print ("ERROR: Cant build release - Tag is not on current commit!")
+        env.Exit(1);
+
     #Stop release unless the codebase has been tagged
     if build_version == "" :
         print ("ERROR: Cant build release - Ensure there is a release tag and no local modifications")
