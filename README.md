@@ -1,10 +1,12 @@
 # PCW WiFi modem
 
-This is a fork of the RetroWiFiModem project with customization for building an Amstrad PCW8256/8512 Wifi Modem - Most notably without the need for a separate RS232 interface such as the CPS8256.
+This is a fork of the RetroWiFiModem project for building an Amstrad PCW8256/8512 Wifi Modem, most notably without the need for an additional RS232 interface such as the CPS8256.
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
-Please see the original project for more information on the RetroWiFiModem including it's history, contributors and original hardware.  
+For a PCB try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
+
+This firmware has been tested with boards built from the schematics here, but you could probably flash other firmware providing it is built for the D1 mini and uses the hardware's TX/RX (and CTS/RTS if needed) pins.
 
 ## First time setup
 
@@ -110,4 +112,5 @@ platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a w
 
 
 ## References & Acknowledgements
-RetroWifiModem project et all!
+Thanks to the cool RetroWifiModem project!
+Please see the RetroWifiModem project for more information on the RetroWiFiModem including it's history, contributors and original hardware.  
