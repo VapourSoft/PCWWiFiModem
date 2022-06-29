@@ -102,13 +102,12 @@ Once flashed and the connection to WiFi is configured, firmware can also be upda
 snafu'd at the moment, and that it's breaking things in the modem
 software...
 
-#### Building with Arduino IDE
-Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
-Also you will probably need to rename .cpp files to .ino to build with the Arduino IDE.
-
 #### Building with PlatformIO
 platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a workaround for the ESP8266 core issue mentioned above.
 
+#### Building with Arduino IDE
+Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
+I use PlatformIO as an IDE, so you will probably need to rename .cpp files to .ino to build with the Arduino IDE as a minimum.
 
 
 ## References & Acknowledgements
