@@ -1,10 +1,12 @@
 # PCW WiFi modem
 
-This is a fork of the RetroWiFiModem project with customization for building an Amstrad PCW8256/8512 Wifi Modem - Most notably without the need for a separate RS232 interface such as the CPS8256.
+This is a fork of the RetroWiFiModem project for building an Amstrad PCW8256/8512 Wifi Modem, most notably without the need for an additional RS232 interface such as the CPS8256.
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
-Please see the original project for more information on the RetroWiFiModem including it's history, contributors and original hardware.  
+For a PCB try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
+
+This firmware has been tested with boards built from the schematics here, but you could probably flash other firmware providing it is built for the D1 mini and uses the hardware's TX/RX (and CTS/RTS if needed) pins.
 
 ## First time setup
 
@@ -13,7 +15,7 @@ Please see the original project for more information on the RetroWiFiModem inclu
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
-NOTE: It seems that 9600 baud is a bit fast for CP/M on the PCW to keep up with, however enabling hardware flow control on both the modem and PCW will solve this.  The PCW version of QTERM (recommended) is a lot faster as it goes direct to the hardware and you may not need flow control using this at higher speeds.
+NOTE: 9600 baud is a bit fast for CP/M on the PCW to keep up with without enabling hardware flow control.  The PCW version of QTERM is faster, you may not need flow control using this.
 
 Here's the commands you need to set up the modem to automatically
 connect to your WiFi network:
@@ -100,14 +102,14 @@ Once flashed and the connection to WiFi is configured, firmware can also be upda
 snafu'd at the moment, and that it's breaking things in the modem
 software...
 
-#### Building with Arduino IDE
-Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
-Also you will probably need to rename .cpp files to .ino to build with the Arduino IDE.
-
 #### Building with PlatformIO
 platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a workaround for the ESP8266 core issue mentioned above.
 
+#### Building with Arduino IDE
+Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
+I use PlatformIO as an IDE, so you will probably need to rename .cpp files to .ino to build with the Arduino IDE as a minimum.
 
 
 ## References & Acknowledgements
-RetroWifiModem project et all!
+Thanks to the cool RetroWifiModem project!
+Please see the RetroWifiModem project for more information on the RetroWiFiModem including it's history, contributors and original hardware.  
