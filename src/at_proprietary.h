@@ -146,19 +146,17 @@ char *doSpeedChange(char *atCmd) {
                //case 57600L:                   // Not supported on PCW
                //case 76800L:                   // Not supported on PCW
                //case 115200L:                  // Not supported on PCW
-                  sendResult(R_OK);
-                  Serial.flush();               // wait for transmit to finish
-                  digitalWrite(TXEN, HIGH);     // disable the TX output
-
-                  if ( newSerialSpeed == 19200)
+                  {
+                     sendResult(R_OK);
+                     Serial.flush();               // wait for transmit to finish
+                     //digitalWrite(TXEN, HIGH);     // disable the TX output
+                     
                      //The output from counter IC on PCW WiFi Modem board when &00, &07 is written to the register actually results in 17857 BAUD!
-                     uart_div_modify(0, UART_CLK_FREQ / 17857 );
-                  else
-                     Serial.updateBaudRate(newSerialSpeed);
-
-                  settings.serialSpeed = newSerialSpeed;
-                  digitalWrite(TXEN, LOW);  // reenable the TX output
-                  break;
+                     Serial.updateBaudRate(( newSerialSpeed == 19200L) ? 17857L : newSerialSpeed );
+                     settings.serialSpeed = newSerialSpeed;
+                     //digitalWrite(TXEN, LOW);  // reenable the TX output
+                     break;
+                  }
 
                default:
                   sendResult(R_ERROR);
