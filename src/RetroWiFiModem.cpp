@@ -57,17 +57,16 @@ This way, no matter how long the code has to wait for space in the transmit FIFO
 
 // =============================================================
 void setup(void) {
-   bool ok = true;
 
    pinMode(RI, OUTPUT);
-   pinMode(DCD, OUTPUT);
-   pinMode(DSR, OUTPUT);
-   digitalWrite(TXEN, HIGH);     // continue disabling TX until
-   pinMode(TXEN, OUTPUT);        // we have set up the Serial port
+   //pinMode(DCD, OUTPUT);
+   //pinMode(DSR, OUTPUT);
+   //digitalWrite(TXEN, HIGH);     // continue disabling TX until
+   //pinMode(TXEN, OUTPUT);        // we have set up the Serial port
 
    digitalWrite(RI, !ACTIVE);    // not ringing
-   digitalWrite(DCD, !ACTIVE);   // not connected
-   digitalWrite(DSR, !ACTIVE);   // modem is not ready
+   //digitalWrite(DCD, !ACTIVE);   // not connected
+   //digitalWrite(DSR, !ACTIVE);   // modem is not ready
 
    EEPROM.begin(sizeof(struct Settings));
    EEPROM.get(0, settings);
@@ -79,12 +78,9 @@ void setup(void) {
    }
    sessionTelnetType = settings.telnet;
 
-   Serial.begin(settings.serialSpeed, getSerialConfig());
-   digitalWrite(TXEN, LOW);      // enable the TX output
-
-   
-   setHardwareFlow(settings.rtsCts);
-   
+   uint32_t baud = (settings.serialSpeed == 19200L) ? 17857L : settings.serialSpeed;
+   Serial.begin(baud, getSerialConfig());
+   //digitalWrite(TXEN, LOW);      // enable the TX output
    if( settings.startupWait ) {
       while( true ) {            // wait for a CR
          yield();
@@ -113,7 +109,8 @@ void setup(void) {
 
    if( WiFi.status() == WL_CONNECTED || !settings.ssid[0] ) {
       if( WiFi.status() == WL_CONNECTED ) {
-         digitalWrite(DSR, ACTIVE);  // modem is finally ready or SSID not configured
+         //digitalWrite(DSR, ACTIVE);  // modem is finally ready or SSID not configured
+         setHardwareFlow(settings.rtsCts);
       }
       if( settings.autoExecute[0] ) {
          strncpy(atCmd, settings.autoExecute, MAX_CMD_LEN);
@@ -149,7 +146,7 @@ uart_tx_fifo_available(const int uart_nr)
 
 inline bool
 uart_tx_fifo_full(const int uart_nr)
-{
+{  
     return uart_tx_fifo_available(uart_nr) >= 0x7f;
 }
 

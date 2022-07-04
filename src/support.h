@@ -44,41 +44,33 @@ void inAtCommandMode() {
    }
 }
 
-//
-// send serial data to the TCP client
-//
-void sendSerialData() {
-   static unsigned long lastSerialData = 0;
-   // in telnet mode, we might have to escape every single char,
-   // so don't use more than half the buffer
-   size_t maxBufSize = (sessionTelnetType != NO_TELNET) ? TX_BUF_SIZE / 2 : TX_BUF_SIZE;
-   size_t len = Serial.available();
-   if( len > maxBufSize) {
-      len = maxBufSize;
-   }
-   Serial.readBytes(txBuf, len);
 
-   if (telnetLocalEcho)
-      Serial.write(txBuf,len);
+void checkForEscape(char c)
+{
+   static unsigned long lastSerialData = 0;
 
    if( escCount || (millis() - lastSerialData >= GUARD_TIME) ) {
       // check for the online escape sequence
       // +++ with a 1 second pause before and after
-      for( size_t i = 0; i < len; ++i ) {
-         if( txBuf[i] == settings.escChar ) {
-            if( ++escCount == ESC_COUNT ) {
-               guardTime = millis() + GUARD_TIME;
-            } else {
-               guardTime = 0;
-            }
+      if( c == settings.escChar ) {
+         if( ++escCount == ESC_COUNT ) {
+            guardTime = millis() + GUARD_TIME;
          } else {
-            escCount = 0;
+            guardTime = 0;
          }
+      } else {
+         escCount = 0;
       }
    } else {
       escCount = 0;
    }
    lastSerialData = millis();
+}
+
+//
+// send serial data to the TCP client
+//
+void sendSerialData(size_t len) {
 
    // in Telnet mode, escape every IAC (0xff) by inserting another
    // IAC after it into the buffer (this is why we only read up to
@@ -100,6 +92,64 @@ void sendSerialData() {
    }
    bytesOut += tcpClient.write(txBuf, len);
    yield();
+}
+
+
+void sendSerialData() {
+
+   // in telnet mode, we might have to escape every single char,
+   // so don't use more than half the buffer
+   size_t maxBufSize = (sessionTelnetType != NO_TELNET) ? TX_BUF_SIZE / 2 : TX_BUF_SIZE;
+   
+   if (telnetLocalEdit)
+   {
+      if( Serial.available() ) {
+            char c = Serial.read();
+            
+            checkForEscape(c);
+            
+            if( c == LF || c == CR ) {       // command finished?
+               if (editBufferLen < maxBufSize-1)
+               {
+                  if( telnetLocalEcho ) {
+                     Serial.println();
+                  }
+                  txBuf[editBufferLen++] = c;  // add char to editBuffer
+                  sendSerialData(editBufferLen);
+                  editBufferLen = 0;
+               }
+            } else if( (c == BS || c == DEL)) {
+               if (editBufferLen > 0)
+               {
+                  if( telnetLocalEcho ) {
+                     Serial.print(F("\b \b"));
+                  }
+                  --editBufferLen;
+               }
+            } else{
+               if (editBufferLen < maxBufSize-2) //-2 to ensure we have space for a CR
+               {
+                  if( telnetLocalEcho ) {
+                     Serial.print(c);
+                  }
+                  txBuf[editBufferLen++] = c;  // add char to editBuffer
+               }
+            }
+      }      
+   }
+   else
+   {
+      size_t len = Serial.available();
+      if( len > maxBufSize) {
+         len = maxBufSize;
+      }
+      Serial.readBytes(txBuf, len);
+
+      for (int i = 0; i < len; i++)
+         checkForEscape(txBuf[i]);
+
+      sendSerialData(len);
+   }
 }
 
 
@@ -192,6 +242,11 @@ int receiveTcpData() {
                      // so we need to echo ourself
                      telnetLocalEcho = true;
                      break;
+                  case SUP_GA : 
+                     // In this case we have asked server to supress goahead and it has refused, this is often the case with MUDs
+                     // so we need to enable local line editing
+                     telnetLocalEdit = true;
+                     editBufferLen = 0; //reset edit buffer size
                }
                break; 
 
@@ -207,6 +262,9 @@ int receiveTcpData() {
                   switch( cmdByte2 ) {
                      case ECHO:
                         telnetLocalEcho = false; //We dont need to echo as server WILL
+                        break;
+                     case SUP_GA:
+                        telnetLocalEdit = false;
                         break;
                      case LINEMODE:
                      case NAWS:
@@ -399,7 +457,7 @@ void endCall() {
    tcpClient.stop();
    sendResult(R_NO_CARRIER);
    connectTime = 0;
-   digitalWrite(DCD, !ACTIVE);
+   //digitalWrite(DCD, !ACTIVE);
    escCount = 0;
 }
 
@@ -479,7 +537,7 @@ void checkForIncomingCall() {
             sendResult(R_CONNECT);
          }
          connectTime = millis();
-         digitalWrite(DCD, ACTIVE);
+         //digitalWrite(DCD, ACTIVE);
       }
    } else if( ringing ) {
       digitalWrite(RI, !ACTIVE);
@@ -488,6 +546,7 @@ void checkForIncomingCall() {
    }
 }
 
+void setHardwareFlow(boolean enabled); //forward ref
 //
 // setup for OTA sketch updates
 //
@@ -495,14 +554,16 @@ void setupOTAupdates() {
    ArduinoOTA.setHostname(settings.mdnsName);
 
    ArduinoOTA.onStart([]() {
+      setHardwareFlow(false); //Disable flow control during the update
       Serial.println(F("OTA upload start"));
-      digitalWrite(DSR, !ACTIVE);
+      //digitalWrite(DSR, !ACTIVE);
    });
 
    ArduinoOTA.onEnd([]() {
       Serial.println(F("OTA upload end - programming"));
       Serial.flush();                  // allow serial output to finish
-      digitalWrite(TXEN, HIGH);        // before disabling the TX output
+      setHardwareFlow(settings.rtsCts);
+      //digitalWrite(TXEN, HIGH);        // before disabling the TX output
    });
 
    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
@@ -539,6 +600,7 @@ void setupOTAupdates() {
             break;
       }
       sendResult(R_ERROR);
+      setHardwareFlow(settings.rtsCts);
    });
    ArduinoOTA.begin();
 }

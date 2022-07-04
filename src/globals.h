@@ -53,6 +53,8 @@
    
    bool minTelnetOptionsPending = false; //When true send our minimum telnet options to server
    bool telnetLocalEcho = true;          //When server refuses to ECHO we need to do it ourself
+   bool telnetLocalEdit = true;          //When server refuses to SUP_GA we need to do local line editing ourself
+   size_t editBufferLen = 0;
 
    bool     ringing = false;             // no incoming call
    uint8_t  ringCount = 0;               // current incoming call ring count

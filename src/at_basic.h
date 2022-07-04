@@ -8,7 +8,7 @@ char *answerCall(char *atCmd) {
    ringCount = 0;
    connectTime = millis();
    sendResult(R_CONNECT);
-   digitalWrite(DCD, ACTIVE); // we've got a carrier signal
+   //digitalWrite(DCD, ACTIVE); // we've got a carrier signal
    state = ONLINE;
    Serial.flush();
    return atCmd;
@@ -35,7 +35,7 @@ char *wifiConnection(char *atCmd) {
          if( !atCmd[0] ) {
             sendResult(R_OK);
          }
-         digitalWrite(DSR, !ACTIVE);  // modem is not ready
+         //digitalWrite(DSR, !ACTIVE);  // modem is not ready
          break;
       case '1':
          ++atCmd;
@@ -60,7 +60,7 @@ char *wifiConnection(char *atCmd) {
             if( WiFi.status() != WL_CONNECTED ) {
                sendResult(R_ERROR);
             } else {
-               digitalWrite(DSR, ACTIVE);  // modem is ready
+               //digitalWrite(DSR, ACTIVE);  // modem is ready
                yield();
                if( !settings.quiet && settings.extendedCodes ) {
                   Serial.printf("CONNECTED TO %s IP ADDRESS: %s\r\n",
@@ -174,14 +174,16 @@ char *dialNumber(char *atCmd) {
    if( tcpClient.connect(host, portNum) && !Serial.available() ) {
       connectTime = millis();
       sendResult(R_CONNECT);
-      digitalWrite(DCD, ACTIVE);
+      //digitalWrite(DCD, ACTIVE);
       state = ONLINE;
-      minTelnetOptionsPending = !(sessionTelnetType == NO_TELNET);
-      telnetLocalEcho = !(sessionTelnetType == NO_TELNET); 
+      minTelnetOptionsPending = (sessionTelnetType != NO_TELNET);
+      telnetLocalEcho = (sessionTelnetType != NO_TELNET); 
+      telnetLocalEdit = (sessionTelnetType != NO_TELNET); 
+      editBufferLen = 0; //reset edit buffer size
       yield();
    } else {
       sendResult(R_NO_CARRIER);
-      digitalWrite(DCD, !ACTIVE);
+      //digitalWrite(DCD, !ACTIVE);
    }
    atCmd[0] = NUL;
    return atCmd;
@@ -256,11 +258,11 @@ char *httpGet(char *atCmd) {
    // Establish connection
    if( !tcpClient.connect(host, portNum) ) {
       sendResult(R_NO_CARRIER);
-      digitalWrite(DCD, !ACTIVE);
+      //digitalWrite(DCD, !ACTIVE);
    } else {
       connectTime = millis();
       sendResult(R_CONNECT);
-      digitalWrite(DCD, ACTIVE);
+      //digitalWrite(DCD, ACTIVE);
       state = ONLINE;
 
       // Send a HTTP request before continuing the connection as usual
@@ -564,7 +566,7 @@ char *doDateTime(char *atCmd) {
    if( !tcpClient.connected() ) {
       char result[80], *ptr;
       if( tcpClient.connect(NIST_HOST, NIST_PORT) ) {
-         digitalWrite(DCD, ACTIVE);
+         //digitalWrite(DCD, ACTIVE);
          // read date/time from NIST
          size_t len = tcpClient.readBytes(result, 1);
          if( len == 1 && result[0] == '\n' ) {  // leading LF
@@ -587,7 +589,7 @@ char *doDateTime(char *atCmd) {
             }
          }
          tcpClient.stop();
-         digitalWrite(DCD, !ACTIVE);
+         //digitalWrite(DCD, !ACTIVE);
       }
    }
    if( ok ) {
@@ -704,7 +706,7 @@ char *doExtended(char *atCmd) {
 //
 char *resetToNvram(char *atCmd) {
    Serial.flush();                     // allow for CR/LF to finish
-   digitalWrite(TXEN, HIGH);           // before disabling the TX output
+   //digitalWrite(TXEN, HIGH);           // before disabling the TX output
    ESP.restart();
    return atCmd;                       // should never actually get here...
 }

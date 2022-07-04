@@ -72,25 +72,25 @@
 
    #ifdef ARDUINO_ESP8266_WEMOS_D1R1
       // D1 R1 pins
-      #define CTS D11           // (GPIO13) output
-      #define RTS D10           // (GPIO15) input
+      #define CTS D11           // (GPIO13) input
+      #define RTS D10           // (GPIO15) output
       #define RI  D12           // (GPIO12) output
-      #define DSR D4            // (GPIO04) output
-      #define DCD D3            // (GPIO05) output
-      #define TXEN D5           // (GPIO14) output
+      //#define DSR D4            // (GPIO04) output
+      //#define DCD D3            // (GPIO05) output
+      //#define TXEN D5           // (GPIO14) output
    #endif
 
    #ifdef ARDUINO_ESP8266_WEMOS_D1MINI
       // D1 mini pins
       
 	  //Note change from original project
-      #define CTS D7            // (GPIO13) output
-      #define RTS D8            // (GPIO15) input
+      #define CTS D7            // (GPIO13) input
+      #define RTS D8            // (GPIO15) output
 
       #define RI  D6            // (GPIO12) output (Not connected in PCW WiFi)
-      #define DSR D2            // (GPIO04) output (Not connected in PCW WiFi)
-      #define DCD D1            // (GPIO05) output (Not connected in PCW WiFi)
-      #define TXEN D5           // (GPIO14) output (Not connected in PCW WiFi)
+      //#define DSR D2            // (GPIO04) output (Not connected in PCW WiFi)
+      //#define DCD D1            // (GPIO05) output (Not connected in PCW WiFi)
+      //#define TXEN D5           // (GPIO14) output (Not connected in PCW WiFi)
    #endif
 
 #endif
