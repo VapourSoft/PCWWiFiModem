@@ -15,7 +15,7 @@ Boards have been tested with the firmware here, but you should be able to flash 
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
-NOTE: 9600 baud is a bit fast for CP/M on the PCW to keep up with without enabling hardware flow control.  The PCW version of QTERM is faster, you may not need flow control using this.
+If using 9600 baud or higher it is recommended that you enable hardware flow control, and use CP/M 1.7 or later.
 
 Here's the commands you need to set up the modem to automatically
 connect to your WiFi network:
