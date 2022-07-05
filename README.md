@@ -6,7 +6,7 @@ Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
 For a PCB try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
 
-This firmware has been tested with boards built from the schematics here, but you could probably flash other firmware providing it is built for the D1 mini and uses the hardware's TX/RX (and CTS/RTS if needed) pins.
+Boards have been tested with the firmware here, but you should be able to flash other firmware providing it uses the D1 mini's TX/RX (and CTS/RTS if needed) pins.
 
 ## First time setup
 
