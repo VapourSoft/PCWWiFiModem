@@ -4,7 +4,7 @@ This is a fork of the RetroWiFiModem project for building an Amstrad PCW8256/851
 
 Wiki is here: https://github.com/VapourSoft/PCWWiFiModem/wiki
 
-For a PCB try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
+For a ready made PCB, or even a full self assembly kit try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
 
 Boards have been tested with the firmware here, but you should be able to flash other firmware providing it uses the D1 mini's TX/RX (and CTS/RTS if needed) pins.
 
