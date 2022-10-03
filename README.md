@@ -18,8 +18,6 @@ A quick guide is here: https://github.com/VapourSoft/PCWWiFiModem/wiki/Flashing-
 
 ## First time setup
 
-#### Warning: Never attach or remove peripherals from the PCW expansion port while the machine is switched on!
-
 The default serial configuration is 9600bps, 8 data bits, no parity, 1
 stop bit.
 
