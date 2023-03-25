@@ -1,5 +1,7 @@
-void doAtCmds(char *atCmd);             // forward delcaration
+volatile boolean breakCondition = false;
 
+void doAtCmds(char *atCmd);             // forward delcaration
+char *dialNumber(char *atCmd);     // forward delcaration
 //
 // We're in local command mode. Assemble characters from the
 // serial port into a buffer for processing.
@@ -906,3 +908,42 @@ static bool PagedOut(const __FlashStringHelper *flashStr, bool reset=false) {
 	str[(sizeof str)-1] = 0;
 	return PagedOut(str, reset);
 }
+
+
+LOCAL void uart0_intr_handler(void *para) // must not use ICACHE_FLASH_ATTR !
+{
+   ETS_UART_INTR_DISABLE();
+
+   //if ( READ_PERI_REG(UART_INT_RAW(UART0)) & UART_BRK_DET_INT_RAW )
+   if ( READ_PERI_REG(UART_INT_ST(UART0)) & UART_BRK_DET_INT_ST )
+   {
+      breakCondition = true;
+
+      // clear rx fifo (apparently this is not optional at this point)
+      SET_PERI_REG_MASK(UART_CONF0(UART0), UART_RXFIFO_RST);
+      CLEAR_PERI_REG_MASK(UART_CONF0(UART0), UART_RXFIFO_RST);
+   }
+
+   //This clears all interrupts but keep getting hardware watchdog barking using only WRITE_PERI_REG(UART_INT_CLR(UART0), UART_BRK_DET_INT_CLR );
+   WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
+      
+   ETS_UART_INTR_ENABLE();   
+}
+
+
+void enableLineBreakInterrupt()
+{
+   SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_BRK_DET_INT_ENA );
+
+   ETS_UART_INTR_DISABLE();
+
+   ETS_UART_INTR_ATTACH(uart0_intr_handler,  NULL);
+
+   //clear all interrupt
+	WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
+
+	ETS_UART_INTR_ENABLE();
+   
+}
+
+

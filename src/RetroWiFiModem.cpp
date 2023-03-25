@@ -57,30 +57,29 @@ This way, no matter how long the code has to wait for space in the transmit FIFO
 
 // =============================================================
 void setup(void) {
-
-   pinMode(RI, OUTPUT);
-   //pinMode(DCD, OUTPUT);
-   //pinMode(DSR, OUTPUT);
-   //digitalWrite(TXEN, HIGH);     // continue disabling TX until
-   //pinMode(TXEN, OUTPUT);        // we have set up the Serial port
-
+   
+   pinMode(RI, OUTPUT);        //Not connected in current version
    digitalWrite(RI, !ACTIVE);    // not ringing
-   //digitalWrite(DCD, !ACTIVE);   // not connected
-   //digitalWrite(DSR, !ACTIVE);   // modem is not ready
+   pinMode(RTS,OUTPUT);
+   digitalWrite(RTS,HIGH);
+
+   pinMode(NVRAM_RESET_PIN, INPUT_PULLUP);
 
    EEPROM.begin(sizeof(struct Settings));
    EEPROM.get(0, settings);
 
-   //Force defaults
-   if( settings.magicNumber != MAGIC_NUMBER ) {
-      // no valid data in EEPROM/NVRAM, populate with defaults
+   //Force defaults if magic number (size of setings struct) is wrong, or NVRAM_RESET_PIN is LOW 
+   if( settings.magicNumber !=  sizeof(struct Settings) || digitalRead(NVRAM_RESET_PIN) == LOW  ) {
+      // reset or no valid data in EEPROM/NVRAM, populate with defaults
       factoryDefaults(NULL);
    }
    sessionTelnetType = settings.telnet;
 
    uint32_t baud = (settings.serialSpeed == 19200L) ? 17857L : settings.serialSpeed;
    Serial.begin(baud, getSerialConfig());
-   //digitalWrite(TXEN, LOW);      // enable the TX output
+   
+   Serial.println(ESP.getResetInfo());   
+
    if( settings.startupWait ) {
       while( true ) {            // wait for a CR
          yield();
@@ -92,39 +91,38 @@ void setup(void) {
       }
    }
 
-   WiFi.begin();
-   if( settings.ssid[0] ) {
-      WiFi.waitForConnectResult();
-      WiFi.mode(WIFI_STA);
-   }
+   //Dont remember previous WifiConnection always load connection settings
+   //from the modem settings
+   WiFi.persistent(false);
+
+   //Send TCP/IP data immediately
    WiFiClient::setDefaultNoDelay(true);  // disable Nalge algorithm by default
 
-   if( settings.listenPort ) {
-      tcpServer.begin(settings.listenPort);
-   }
+   //Ensure flow control is off while we try to connect automatically
+   //This prevents our progress output from blocking the connection
+   //If the computer is not ready
+   setHardwareFlow(false);
 
-   if( settings.ssid[0] && WiFi.status() == WL_CONNECTED ) {
-      setupOTAupdates();
-   }
+   //Try to connect automatically if ssid and password are set
+   if( settings.ssid[0] && settings.wifiPassword[0] ) 
+      doWiFiConnection();
 
-   if( WiFi.status() == WL_CONNECTED || !settings.ssid[0] ) {
-      if( WiFi.status() == WL_CONNECTED ) {
-         //digitalWrite(DSR, ACTIVE);  // modem is finally ready or SSID not configured
-         setHardwareFlow(settings.rtsCts);
+   if (settings.diServer[0] != 0)
+      enableLineBreakInterrupt();   
+
+   //Execute automatic command if it is set
+   if( settings.autoExecute[0] ) {
+      strncpy(atCmd, settings.autoExecute, MAX_CMD_LEN);
+      atCmd[MAX_CMD_LEN] = NUL;
+      if( settings.echo ) {
+         Serial.println(atCmd);
       }
-      if( settings.autoExecute[0] ) {
-         strncpy(atCmd, settings.autoExecute, MAX_CMD_LEN);
-         atCmd[MAX_CMD_LEN] = NUL;
-         if( settings.echo ) {
-            Serial.println(atCmd);
-         }
-         doAtCmds(atCmd);                  // auto execute command
-      } else {
-         sendResult(R_OK);
-      }
+      doAtCmds(atCmd);                  // auto execute command
    } else {
-      sendResult(R_ERROR);           // SSID configured, but not connected
+      sendResult(R_OK);
    }
+
+   setHardwareFlow(settings.rtsCts);
 }
 
 
@@ -150,10 +148,66 @@ uart_tx_fifo_full(const int uart_nr)
     return uart_tx_fifo_available(uart_nr) >= 0x7f;
 }
 
+void handleBreakCondition()
+{
+
+   if (settings.diServer[0] != 0)
+   {
+      //setHardwareFlow(false);
+      //digitalWrite(RTS,HIGH);
+      //digitalWrite(RTS,LOW);   
+      //digitalWrite(RTS,HIGH);
+      //digitalWrite(RTS,LOW);   
+
+      //Ensure we dont sent any log messages!
+      settings.quiet = true;
+
+      //Disable any hardware flow control
+      //setHardwareFlow(false);
+
+      //End any call we may be in
+      endCall();
+      //Serial.flush();               // wait for transmit to finish
+    
+      //This is important at these fast baud rates where its all about speed otherwise we get watchdog timer kick in!
+      WiFiClient::setDefaultNoDelay(false);
+      //Serial.end();
+
+      //Switch to correct baud 
+      settings.dataBits = 8;
+      settings.parity = 'N';
+      settings.stopBits = 1;
+      
+      //This seems to rest uart and lose the int handler !!!!!
+      //Serial.begin(17857L, getSerialConfig());
+
+      //Serial.updateBaudRate(17857L);
+      Serial.updateBaudRate(31250L);
+            
+      //Dial the DI server
+      char number[MAX_SPEED_DIAL_LEN + 1];
+      strncpy(number,settings.diServer,MAX_SPEED_DIAL_LEN + 1);
+      dialNumber(number);
+
+      //Enable hardware flow control
+      setHardwareFlow(true);
+
+      //On success send DI and version
+      if (state == ONLINE )
+         Serial.print("DIOK");
+      else
+         Serial.print("DIER");
+      
+   }
+   breakCondition = false;
+}
 
 
 // =============================================================
 void loop(void) {
+
+   if (breakCondition)
+      handleBreakCondition();
 
    checkForIncomingCall();
 
@@ -182,7 +236,7 @@ void loop(void) {
             sendSerialData();
          }
 
-         while( tcpClient.available() && !Serial.available() && !uart_tx_fifo_full(0) ) { // data from WiFi to RS-232
+         while( tcpClient.available() && !Serial.available() && !uart_tx_fifo_full(0) && !breakCondition ) { // data from WiFi to RS-232
             int c = receiveTcpData();
             if( c != -1 ) {
                Serial.write((char)c);
@@ -330,6 +384,9 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "$MDNS", 5) ) {
                   // handle mDNS name
                   atCmd = doMdnsName(atCmd + 5);
+               } else if( !strncasecmp(atCmd, "$DI", 3) ) {
+                  // handle mDNS name
+                  atCmd = diServerAutoConnect(atCmd + 3);
                } else {
                   // unrecognized command
                   sendResult(R_ERROR);
