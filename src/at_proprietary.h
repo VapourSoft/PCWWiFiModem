@@ -25,6 +25,35 @@ char *doAutoExecute(char *atCmd) {
    return atCmd;
 }
 
+
+//
+// AT$DI? query DI Server connect string
+// AT$DI=DI Server connect string
+//
+char *diServerAutoConnect(char *atCmd) {
+   switch( atCmd[0] ) {
+      case '?':
+         ++atCmd;
+         Serial.println(settings.diServer);
+         if( !atCmd[0] ) {
+            sendResult(R_OK);
+         }
+         break;
+      case '=':
+         ++atCmd;
+         strncpy(settings.diServer, atCmd, MAX_SPEED_DIAL_LEN);
+         settings.busyMsg[MAX_SPEED_DIAL_LEN] = NUL;
+         atCmd[0] = NUL;
+         sendResult(R_OK);
+         break;
+      default:
+         sendResult(R_ERROR);
+         break;
+   }
+   return atCmd;
+}
+
+
 //
 // AT$BM?  query busy message
 // AT$BM=busy message set busy message

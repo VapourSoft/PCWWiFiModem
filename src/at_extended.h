@@ -2,7 +2,7 @@
 // AT&F reset NVRAM to defaults and load them into current settings
 //
 char *factoryDefaults(char *atCmd) {
-   settings.magicNumber = MAGIC_NUMBER;
+   settings.magicNumber = sizeof(struct Settings);
    settings.ssid[0] = NUL;
    settings.wifiPassword[0] = NUL;
    settings.serialSpeed = DEFAULT_SPEED;
@@ -38,6 +38,8 @@ char *factoryDefaults(char *atCmd) {
    strcpy(settings.speedDial[1], "amstrad.simulant.uk:464");
    strcpy(settings.alias[2], "heatwave");
    strcpy(settings.speedDial[2], "heatwave.ddns.net:9640");
+
+   settings.diServer[0] = NUL;
 
    EEPROM.put(0, settings);
    EEPROM.commit();

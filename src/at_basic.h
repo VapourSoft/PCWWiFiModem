@@ -14,6 +14,50 @@ char *answerCall(char *atCmd) {
    return atCmd;
 }
 
+
+bool doWiFiConnection()
+{
+   if( !settings.quiet && settings.extendedCodes ) {
+      Serial.print(F("\r\nCONNECTING TO SSID: "));
+      Serial.print(settings.ssid);
+   }
+   WiFi.begin(settings.ssid, settings.wifiPassword);
+   for( int i = 0; i < 50; ++i ) {
+      delay(500);
+      if( !settings.quiet && settings.extendedCodes ) {
+         Serial.print('.');
+      }
+      if( WiFi.status() == WL_CONNECTED ) {
+         break;
+      }
+   }
+   if( !settings.quiet && settings.extendedCodes ) {
+      Serial.println();
+   }
+   if( WiFi.status() != WL_CONNECTED ) {
+      return false;
+   } else {
+      //digitalWrite(DSR, ACTIVE);  // modem is ready
+      yield();
+
+      //Setup OTA here
+      setupOTAupdates();
+
+      if( !settings.quiet && settings.extendedCodes ) {
+         Serial.printf("CONNECTED TO %s\r\nIP ADDRESS: %s\r\n",
+            settings.ssid, WiFi.localIP().toString().c_str());
+      }
+
+      //Listen for connections if configured
+      if( settings.listenPort ) {
+            //Listen for incoming connections
+            tcpServer.begin(settings.listenPort);
+      }
+
+      return true;
+   }
+}
+
 //
 // ATC? query WiFi connection status
 // ATC0 disconnect from WiFi network
@@ -40,36 +84,15 @@ char *wifiConnection(char *atCmd) {
       case '1':
          ++atCmd;
          if( settings.ssid[0] && settings.wifiPassword[0] ) {
-            if( !settings.quiet && settings.extendedCodes ) {
-               Serial.print(F("CONNECTING TO SSID "));
-               Serial.print(settings.ssid);
+            
+            bool result = doWiFiConnection();
+            if (result)
+            {
+                  if( !atCmd[0] ) 
+                     sendResult(R_OK);
             }
-            WiFi.begin(settings.ssid, settings.wifiPassword);
-            for( int i = 0; i < 50; ++i ) {
-               delay(500);
-               if( !settings.quiet && settings.extendedCodes ) {
-                  Serial.print('.');
-               }
-               if( WiFi.status() == WL_CONNECTED ) {
-                  break;
-               }
-            }
-            if( !settings.quiet && settings.extendedCodes ) {
-               Serial.println();
-            }
-            if( WiFi.status() != WL_CONNECTED ) {
+            else
                sendResult(R_ERROR);
-            } else {
-               //digitalWrite(DSR, ACTIVE);  // modem is ready
-               yield();
-               if( !settings.quiet && settings.extendedCodes ) {
-                  Serial.printf("CONNECTED TO %s IP ADDRESS: %s\r\n",
-                     settings.ssid, WiFi.localIP().toString().c_str());
-               }
-               if( !atCmd[0] ) {
-                  sendResult(R_OK);
-               }
-            }
          } else {
             if( !settings.quiet && settings.extendedCodes ) {
                Serial.println(F("Congigure SSID and password. Type AT? for help."));
@@ -337,10 +360,11 @@ const char helpStr33[] PROGMEM = "Location......: AT$TTL=telnet location";
 const char helpStr34[] PROGMEM = "Terminal size.: AT$TTS=WxH";
 const char helpStr35[] PROGMEM = "Terminal type.: AT$TTY=terminal type";
 const char helpStr36[] PROGMEM = "Startup wait..: AT$W=n";
-const char helpStr37[] PROGMEM = "";
+const char helpStr37[] PROGMEM = "Auto DI Server: AT$DI=host[:port]";
 const char helpStr38[] PROGMEM = "";
-const char helpStr39[] PROGMEM = "Query most commands followed by '?'";
-const char helpStr40[] PROGMEM = "e.g. ATQ?, AT&K?, AT$SSID?";
+const char helpStr39[] PROGMEM = "";
+const char helpStr40[] PROGMEM = "Query most commands followed by '?'";
+const char helpStr41[] PROGMEM = "e.g. ATQ?, AT&K?, AT$SSID?";
 
 const char* const helpStrs[] PROGMEM = {
 	helpStr01, helpStr02, helpStr03, helpStr04, helpStr05, helpStr06,
@@ -349,7 +373,7 @@ const char* const helpStrs[] PROGMEM = {
 	helpStr19, helpStr20, helpStr21, helpStr22, helpStr23, helpStr24,
 	helpStr25, helpStr26, helpStr27, helpStr28, helpStr29, helpStr30,
 	helpStr31, helpStr32, helpStr33, helpStr34, helpStr35, helpStr36,
-	helpStr37, helpStr38, helpStr39, helpStr40
+	helpStr37, helpStr38, helpStr39, helpStr40, helpStr41
 };
 #define NUM_HELP_STRS (sizeof(helpStrs) / sizeof(helpStrs[0]))
 
@@ -399,7 +423,7 @@ char *showNetworkInfo(char *atCmd) {
 
 	do {		// a Q&D hack to allow ^C to terminate the output at the
 		      // end of a page
-		if( PagedOut(F("Retro WiFi modem"), true) ) break;
+		if( PagedOut(F("PCW WiFi modem"), true) ) break;
       if( PagedOut("Version....: " AUTO_VERSION) ) break;
 		if( PagedOut("Build......: " __DATE__ " " __TIME__) ) break;
 		snprintf_P(infoLine, sizeof infoLine, PSTR("Baud.......: %lu"), settings.serialSpeed);

@@ -44,6 +44,7 @@
       bool      extendedCodes;
       bool      verbose;
       bool      quiet;
+      char      diServer[MAX_SPEED_DIAL_LEN + 1];
    } settings;
 
    char atCmd[MAX_CMD_LEN + 1], lastCmd[MAX_CMD_LEN + 1];

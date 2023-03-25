@@ -10,7 +10,7 @@
    #define ESC_CHAR              '+'
    #define ESC_COUNT             3
    #define GUARD_TIME            1000
-   #define MAGIC_NUMBER          0x4321
+
    #define MAX_SSID_LEN          32
    #define MAX_WIFI_PWD_LEN      64
    #define DEFAULT_LISTEN_PORT   6400
@@ -84,8 +84,9 @@
       // D1 mini pins
       
 	  //Note change from original project
-      #define CTS D7            // (GPIO13) input
-      #define RTS D8            // (GPIO15) output
+      #define CTS D7             // (GPIO13) input
+      #define RTS D8             // (GPIO15) output
+      #define NVRAM_RESET_PIN D5 // (GPIO14)  input (Pull low on boot to reset Wemos NVRam )
 
       #define RI  D6            // (GPIO12) output (Not connected in PCW WiFi)
       //#define DSR D2            // (GPIO04) output (Not connected in PCW WiFi)
