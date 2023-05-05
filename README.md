@@ -92,26 +92,10 @@ AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li>
 Please refer to the wiki: https://github.com/VapourSoft/PCWWiFiModem/wiki/Hardware-Assembly
 
 ## Flashing the firmware
-Pre-built firmware https://github.com/VapourSoft/PCWWiFiModem/releases can be uploaded using the *esptool.py* tool in the ESP8266 framework's tools directory. 
-
-e.g.
- `python -m esptool --chip esp8266 --port COM7 write_flash --flash_mode dio --flash_size detect 0x0 "firmware.bin"`
-
-## Updating the firmware
-Once flashed and the connection to WiFi is configured, firmware can also be updated through WiFi using the default OTA upload capability in Arduino IDE, PlatformIO (see platformio.ini), or the ESP8266 framework's espota.py
+Pre-built firmware can be downloaded from https://github.com/VapourSoft/PCWWiFiModem/releases please see: https://github.com/VapourSoft/PCWWiFiModem/wiki/Flashing-the-firmware for instructions on how to flash the D1 mini.
 
 ## Building the firmware
-**Jan 24/22:** It's been reported that the ESP8266 core is slightly
-snafu'd at the moment, and that it's breaking things in the modem
-software...
-
-#### Building with PlatformIO
-platformio.ini currently pins the platform io core to espressif8266@2.6.3 as a workaround for the ESP8266 core issue mentioned above.
-
-#### Building with Arduino IDE
-Please ensure you use ESP8266 core 2.7.4 as a workaround for the ESP8266 core issue mentioned above.
-I use PlatformIO as an IDE, so you will probably need to rename .cpp files to .ino to build with the Arduino IDE as a minimum.
-
+If you want to build the firmware, instead of using pre-built ones please see: https://github.com/VapourSoft/PCWWiFiModem/wiki/Advanced:-Building-the-Firmware-(optional)
 
 ## References & Acknowledgements
 Thanks to the cool RetroWifiModem project!
