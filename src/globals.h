@@ -67,4 +67,5 @@
    uint8_t  passwordLen = 0;
    uint8_t  txBuf[TX_BUF_SIZE];          // Transmit Buffer
    uint8_t  sessionTelnetType;
+   bool     inDIMode = false;
 #endif
