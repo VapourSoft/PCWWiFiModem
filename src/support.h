@@ -692,9 +692,9 @@ void setHardwareFlow(boolean enabled) {
       CLEAR_PERI_REG_MASK(UART_CONF1(0), UART_RX_FLOW_EN);
       CLEAR_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);
 
-      //MAKE RTS LOW OUTPUT (to prevent SIO not ready issue on PCW if its in H/W flow control mode itself )
+      //MAKE RTS ACTIVE (LOW) OUTPUT (to prevent SIO not ready issue on PCW if its in H/W flow control mode itself )
       pinMode(RTS, OUTPUT);
-      digitalWrite(RTS,LOW);
+      digitalWrite(RTS,ACTIVE);
    }
 }
 

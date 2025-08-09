@@ -57,11 +57,18 @@ This way, no matter how long the code has to wait for space in the transmit FIFO
 
 // =============================================================
 void setup(void) {
-   
-   pinMode(RI, OUTPUT);        //Not connected in current version
+
+   pinMode(RI, OUTPUT);          //Not connected in current version
    digitalWrite(RI, !ACTIVE);    // not ringing
+
+   //Ensure flow control is off while we try to connect automatically
+   //This prevents our progress output from blocking the connection
+   //If the computer is not ready
+   setHardwareFlow(false);
+
    pinMode(RTS,OUTPUT);
-   digitalWrite(RTS,HIGH);
+   digitalWrite(RTS,!ACTIVE);    //SET RTS to not ready
+
 
    pinMode(NVRAM_RESET_PIN, INPUT_PULLUP);
 
@@ -73,12 +80,16 @@ void setup(void) {
       // reset or no valid data in EEPROM/NVRAM, populate with defaults
       factoryDefaults(NULL);
    }
-   sessionTelnetType = settings.telnet;
 
+   //Apply saved settings
+   sessionTelnetType = settings.telnet;
    uint32_t baud = (settings.serialSpeed == 19200L) ? 17857L : settings.serialSpeed;
+
+   //Initialize Serial
    Serial.begin(baud, getSerialConfig());
    
-   Serial.println(ESP.getResetInfo());   
+   //Uncomment for debugging
+   //Serial.println(ESP.getResetInfo());   
 
    if( settings.startupWait ) {
       while( true ) {            // wait for a CR
@@ -90,6 +101,11 @@ void setup(void) {
          }
       }
    }
+   else //else because DI SERVER NOT COMPATIBLE WITH WAITING FOR A CR TO CONNECT!!!!
+   {
+      if (settings.diServer[0] != 0)
+         enableLineBreakInterrupt();   
+   }
 
    //Dont remember previous WifiConnection always load connection settings
    //from the modem settings
@@ -98,20 +114,15 @@ void setup(void) {
    //Send TCP/IP data immediately
    WiFiClient::setDefaultNoDelay(true);  // disable Nalge algorithm by default
 
-   //Ensure flow control is off while we try to connect automatically
-   //This prevents our progress output from blocking the connection
-   //If the computer is not ready
-   setHardwareFlow(false);
-
+   
    //Try to connect automatically if ssid and password are set
    if( settings.ssid[0] && settings.wifiPassword[0] ) 
       doWiFiConnection();
 
-   if (settings.diServer[0] != 0)
-      enableLineBreakInterrupt();   
 
    //Execute automatic command if it is set
    if( settings.autoExecute[0] ) {
+      yield();
       strncpy(atCmd, settings.autoExecute, MAX_CMD_LEN);
       atCmd[MAX_CMD_LEN] = NUL;
       if( settings.echo ) {
@@ -122,6 +133,7 @@ void setup(void) {
       sendResult(R_OK);
    }
 
+   //Change flow control to the saved settings
    setHardwareFlow(settings.rtsCts);
 }
 
@@ -153,35 +165,28 @@ void handleBreakCondition()
 
    if (settings.diServer[0] != 0)
    {
-      //setHardwareFlow(false);
-      //digitalWrite(RTS,HIGH);
-      //digitalWrite(RTS,LOW);   
-      //digitalWrite(RTS,HIGH);
-      //digitalWrite(RTS,LOW);   
+      //Ensure we dont sent any messages through serial
+      bool prevQuiet = settings.quiet;
+      int prevBaud = Serial.baudRate();
 
-      //Ensure we dont sent any log messages!
       settings.quiet = true;
-
-      //Disable any hardware flow control
-      //setHardwareFlow(false);
 
       //End any call we may be in
       endCall();
-      //Serial.flush();               // wait for transmit to finish
     
-      //This is important at these fast baud rates where its all about speed otherwise we get watchdog timer kick in!
+      //This is important at these fast baud rates as 
+      //else we get watchdog timer kick in!
       WiFiClient::setDefaultNoDelay(false);
-      //Serial.end();
-
-      //Switch to correct baud 
-      settings.dataBits = 8;
-      settings.parity = 'N';
-      settings.stopBits = 1;
       
-      //This seems to rest uart and lose the int handler !!!!!
-      //Serial.begin(17857L, getSerialConfig());
+      //Dont change serial config as it 
+      //seems to rest uart remove the int handler.
+      //Will assume the following setting are the default for now
+      //settings.dataBits = 8;
+      //settings.parity = 'N';
+      //settings.stopBits = 1;
+      //Serial.begin(31250L, getSerialConfig());
 
-      //Serial.updateBaudRate(17857L);
+      //Set 31,250 Baud
       Serial.updateBaudRate(31250L);
             
       //Dial the DI server
@@ -193,10 +198,15 @@ void handleBreakCondition()
       setHardwareFlow(true);
 
       //On success send DI and version
-      if (state == ONLINE )
+      inDIMode = (state == ONLINE );          //Flag if are in DI mode
+
+      if (inDIMode )
          Serial.print("DIOK");
-      else
+      else{
          Serial.print("DIER");
+         Serial.updateBaudRate(prevBaud);
+         settings.quiet = prevQuiet;
+      }
       
    }
    breakCondition = false;
@@ -243,7 +253,7 @@ void loop(void) {
             }
          }
 
-         if( escCount == ESC_COUNT && millis() > guardTime ) {
+         if( !inDIMode &&  escCount == ESC_COUNT && millis() > guardTime ) {
             state = CMD_IN_CALL;          // +++ detected, back to command mode
             sendResult(R_OK);
             escCount = 0;
