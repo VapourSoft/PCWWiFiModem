@@ -373,6 +373,9 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "$W", 2) ) {
                   // query/set startup wait
                   atCmd = doStartupWait(atCmd + 2);
+               } else if( !strncasecmp(atCmd, "$RST", 4) ) {
+                  // show last reset/crash reason
+                  atCmd = doResetReason(atCmd + 4);
                } else if( !strncasecmp(atCmd, "NET", 3) ) {
                   // query/set telnet mode
                   atCmd = doTelnetMode(atCmd + 3);

@@ -131,7 +131,7 @@ char *speedDialNumber(char *atCmd) {
 // ATDThost[:port] dial a number
 //
 char *dialNumber(char *atCmd) {
-   char *host, *port, *ptr;
+   char *host, *port;
    char tempNumber[MAX_SPEED_DIAL_LEN + 1];
    int portNum;
 
@@ -361,7 +361,7 @@ const char helpStr34[] PROGMEM = "Terminal size.: AT$TTS=WxH";
 const char helpStr35[] PROGMEM = "Terminal type.: AT$TTY=terminal type";
 const char helpStr36[] PROGMEM = "Startup wait..: AT$W=n";
 const char helpStr37[] PROGMEM = "Auto DI Server: AT$DI=host[:port]";
-const char helpStr38[] PROGMEM = "";
+const char helpStr38[] PROGMEM = "Last reset....: AT$RST?";
 const char helpStr39[] PROGMEM = "";
 const char helpStr40[] PROGMEM = "Query most commands followed by '?'";
 const char helpStr41[] PROGMEM = "e.g. ATQ?, AT&K?, AT$SSID?";
@@ -383,7 +383,7 @@ char *showHelp(char *atCmd) {
    PagedOut(F("AT Command Summary:"), true);
    if( settings.width >= 80 ) {
 		// dual columns
-		for( int i=0; i<NUM_HELP_STRS/2; ++i ) {
+		for( size_t i = 0; i<NUM_HELP_STRS/2; ++i ) {
 			strncpy_P(helpLine1, helpStrs[i], (sizeof helpLine1)-1);
 			helpLine[(sizeof helpLine1)-1] = 0;
 			strncpy_P(helpLine2, helpStrs[i+NUM_HELP_STRS/2], sizeof helpLine2);
@@ -400,7 +400,7 @@ char *showHelp(char *atCmd) {
 		}
 	} else {
 		// single column
-		for( int i=0; i<NUM_HELP_STRS; ++i ) {
+		for( size_t i=0; i<NUM_HELP_STRS; ++i ) {
 			strncpy_P(helpLine,helpStrs[i], (sizeof helpLine)-1);
 			helpLine[(sizeof helpLine)-1] = 0;
 			if( PagedOut(helpLine) ) {

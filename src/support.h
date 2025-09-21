@@ -93,8 +93,8 @@ void sendSerialData(size_t len) {
       }
    }
    bytesOut += tcpClient.write(txBuf, len);
-   yield();
-}
+      yield();
+   }
 
 
 void sendSerialData() {
@@ -147,7 +147,7 @@ void sendSerialData() {
       }
       Serial.readBytes(txBuf, len);
 
-      for (int i = 0; i < len; i++)
+      for (size_t i = 0; i < len; i++)
          checkForEscape(txBuf[i]);
 
       sendSerialData(len);
@@ -304,8 +304,8 @@ int receiveTcpData() {
                   case TSPEED:
                      while( tcpClient.read() != SE ) { // discard rest of cmd
                         ++bytesIn;
-                     }
-                     ++bytesIn;
+                           }
+                           ++bytesIn;
 
                      {
                         uint8_t buf[] = {IAC,SB,cmdByte2,VLSUP};
@@ -522,8 +522,19 @@ void checkForIncomingCall() {
          }
       } else if( settings.autoAnswer && ringCount >= settings.autoAnswer ) {
          digitalWrite(RI, !ACTIVE);
+         ringing = false;
+         ringCount = 0;
          tcpClient = tcpServer.available();
-         if( settings.telnet != NO_TELNET ) {
+
+         //use the default telnet type for the session
+         sessionTelnetType = settings.telnet;
+
+         minTelnetOptionsPending = (sessionTelnetType != NO_TELNET);
+         telnetLocalEcho = (sessionTelnetType != NO_TELNET); 
+         telnetLocalEdit = (sessionTelnetType != NO_TELNET); 
+         editBufferLen = 0; //reset edit buffer size
+
+         if( sessionTelnetType != NO_TELNET ) {
             tcpClient.write(IAC);      // incantation to switch
             tcpClient.write(WILL);     // from line mode to
             tcpClient.write(SUP_GA);   // character mode
@@ -623,17 +634,17 @@ SerialConfig getSerialConfig(void) {
    uint8_t serialConfig = 0;
    switch( settings.dataBits ) {
       case 5:
-         serialConfig = serialConfig = UART_NB_BIT_5 | (~UART_NB_BIT_MASK & serialConfig);
+         serialConfig = UART_NB_BIT_5 | (~UART_NB_BIT_MASK & serialConfig);
          break;
       case 6:
-         serialConfig = serialConfig = UART_NB_BIT_6 | (~UART_NB_BIT_MASK & serialConfig);
+         serialConfig = UART_NB_BIT_6 | (~UART_NB_BIT_MASK & serialConfig);
          break;
       case 7:
-         serialConfig = serialConfig = UART_NB_BIT_7 | (~UART_NB_BIT_MASK & serialConfig);
+         serialConfig = UART_NB_BIT_7 | (~UART_NB_BIT_MASK & serialConfig);
          break;
       case 8:
       default:
-         serialConfig = serialConfig = UART_NB_BIT_8 | (~UART_NB_BIT_MASK & serialConfig);
+         serialConfig = UART_NB_BIT_8 | (~UART_NB_BIT_MASK & serialConfig);
          break;
    }
    switch( settings.parity ) {
@@ -758,7 +769,7 @@ void getHostAndPort(char *number, char* &host, char* &port, int &portNum) {
 //
 void displayCurrentSettings(void) {
    Serial.println(F("Active Profile:")); yield();
-   Serial.printf("Baud.......: %lu\r\n", settings.serialSpeed); yield();
+   Serial.printf("Baud.......: %u\r\n", settings.serialSpeed); yield();
    Serial.printf("SSID.......: %s\r\n", settings.ssid); yield();
    Serial.printf("Pass.......: %s\r\n", settings.wifiPassword); yield();
    Serial.printf("mDNS name..: %s.local\r\n", settings.mdnsName); yield();
@@ -784,7 +795,7 @@ void displayCurrentSettings(void) {
 //
 void displayStoredSettings(void) {
    bool v_bool;
-   uint8_t v_uint8;
+   uint8_t v_uint8 = 0;
    uint16_t v_uint16;
    uint32_t v_uint32;
    char v_char16[16 + 1];
@@ -793,7 +804,7 @@ void displayStoredSettings(void) {
    char v_char64[64 + 1];
    char v_char80[80 + 1];
    Serial.println(F("Stored Profile:")); yield();
-   Serial.printf("Baud.......: %lu\r\n", EEPROM.get(offsetof(struct Settings, serialSpeed),v_uint32)); yield();
+   Serial.printf("Baud.......: %u\r\n", EEPROM.get(offsetof(struct Settings, serialSpeed),v_uint32)); yield();
    Serial.printf("SSID.......: %s\r\n", EEPROM.get(offsetof(struct Settings, ssid), v_char32)); yield();
    Serial.printf("Pass.......: %s\r\n", EEPROM.get(offsetof(struct Settings, wifiPassword), v_char64)); yield();
    Serial.printf("mDNS name..: %s.local\r\n", EEPROM.get(offsetof(struct Settings, mdnsName), v_char80)); yield();

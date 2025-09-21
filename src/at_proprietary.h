@@ -14,7 +14,7 @@ char *doAutoExecute(char *atCmd) {
       case '=':
          ++atCmd;
          strncpy(settings.autoExecute, atCmd, MAX_AUTOEXEC_LEN);
-         settings.busyMsg[MAX_AUTOEXEC_LEN] = NUL;
+         settings.autoExecute[MAX_AUTOEXEC_LEN] = NUL;
          atCmd[0] = NUL;
          sendResult(R_OK);
          break;
@@ -42,7 +42,7 @@ char *diServerAutoConnect(char *atCmd) {
       case '=':
          ++atCmd;
          strncpy(settings.diServer, atCmd, MAX_SPEED_DIAL_LEN);
-         settings.busyMsg[MAX_SPEED_DIAL_LEN] = NUL;
+         settings.diServer[MAX_SPEED_DIAL_LEN] = NUL;
          atCmd[0] = NUL;
          sendResult(R_OK);
          break;
@@ -143,7 +143,7 @@ char *doWiFiPassword(char *atCmd) {
 // AT$SB=n set serial speed
 //
 char *doSpeedChange(char *atCmd) {
-   long newSerialSpeed;
+   uint32_t newSerialSpeed;
 
    switch( atCmd[0] ) {
       case '?':
@@ -161,6 +161,7 @@ char *doSpeedChange(char *atCmd) {
          }
          if( newSerialSpeed != settings.serialSpeed ) {
             switch( newSerialSpeed ) {
+               case 31250L:                     // MIDI baud rate 
                case 110L:                       // 110 thru 76.8K are the  standard 'BYE' rates, if you're wondering why  unusual rates like 110, 450 and 710 are in this list
                case 300L:                       
                //case 450L:                     // Not supported on PCW
@@ -411,7 +412,7 @@ char *doTerminalType(char *atCmd) {
       case '=':
          ++atCmd;
          strncpy(settings.terminal, atCmd, MAX_TERMINAL_LEN);
-         settings.location[MAX_TERMINAL_LEN] = NUL;
+         settings.terminal[MAX_TERMINAL_LEN] = NUL;
          atCmd[0] = NUL;
          sendResult(R_OK);
          break;
@@ -448,6 +449,29 @@ char *doStartupWait(char *atCmd) {
             default:
                sendResult(R_ERROR);
                break;
+         }
+         break;
+      default:
+         sendResult(R_ERROR);
+         break;
+   }
+   return atCmd;
+}
+
+//
+// AT$RST? show reason for last reset/crash
+//
+char *doResetReason(char *atCmd) {
+   switch (atCmd[0]) {
+      case '?':
+         ++atCmd;
+         // Short reason string (e.g., "External System", "Watchdog reset", etc.)
+         Serial.print(F("Reset reason: "));
+         Serial.println(ESP.getResetReason());
+         // Detailed info if available (exception cause, EPC, address)
+         Serial.println(ESP.getResetInfo());
+         if (!atCmd[0]) {
+            sendResult(R_OK);
          }
          break;
       default:
