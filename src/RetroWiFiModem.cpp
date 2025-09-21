@@ -176,7 +176,7 @@ void handleBreakCondition()
     
       //This is important at these fast baud rates as 
       //else we get watchdog timer kick in!
-      WiFiClient::setDefaultNoDelay(false);
+      //WiFiClient::setDefaultNoDelay(false); we do this explicitply on the connection below now
       
       //Dont change serial config as it 
       //seems to rest uart remove the int handler.
@@ -189,7 +189,7 @@ void handleBreakCondition()
       //Set 31,250 Baud
       Serial.updateBaudRate(31250L);
             
-      //Dial the DI server
+      //Dial the DI server - ensure number is prefixed with - as we want raw not telnet
       char number[MAX_SPEED_DIAL_LEN + 1];
       strncpy(number,settings.diServer,MAX_SPEED_DIAL_LEN + 1);
       dialNumber(number);
@@ -200,8 +200,12 @@ void handleBreakCondition()
       //On success send DI and version
       inDIMode = (state == ONLINE );          //Flag if are in DI mode
 
-      if (inDIMode )
+      if (inDIMode ){
+         //This is important at these fast baud rates as 
+         //else we get watchdog timer kick in!
+         tcpClient.setNoDelay(false);  // disable Nalge algorithm
          Serial.print("DIOK");
+      }
       else{
          Serial.print("DIER");
          Serial.updateBaudRate(prevBaud);

@@ -535,6 +535,7 @@ void checkForIncomingCall() {
          editBufferLen = 0; //reset edit buffer size
 
          if( sessionTelnetType != NO_TELNET ) {
+            tcpClient.setNoDelay(true);  
             tcpClient.write(IAC);      // incantation to switch
             tcpClient.write(WILL);     // from line mode to
             tcpClient.write(SUP_GA);   // character mode
@@ -545,6 +546,9 @@ void checkForIncomingCall() {
             tcpClient.write(WONT);
             tcpClient.write(LINEMODE);
          }
+         else
+            tcpClient.setNoDelay(false);  // disable Nalge algorithm
+
          sendResult(R_RING_IP);
          if( settings.serverPassword[0]) {
             tcpClient.print(F("\r\nPassword: "));
