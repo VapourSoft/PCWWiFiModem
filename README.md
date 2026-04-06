@@ -6,7 +6,7 @@ You can find the firmware, schematics and BOM in this repository
 
 There is a Wiki here: https://github.com/VapourSoft/PCWWiFiModem/wiki with build and usage instructions
 
-For a ready made PCB you can try: https://www.ebay.co.uk/sch/i.html?_nkw=pcw+wifi+modem
+For a ready made PCB you can try: [eBay]https://www.ebay.co.uk/sch/i.html?_nkw=%22pcw%22+%22wifi%22+%22modem%22
 
 The hardware has been designed and tested in conjuction with the firmware here, but other ESP8266 modem firmware should work 
 if it uses the D1 mini's TX/RX (and CTS/RTS if needed) pins.
